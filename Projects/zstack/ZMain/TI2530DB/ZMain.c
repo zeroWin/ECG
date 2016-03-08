@@ -23,7 +23,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED “AS IS?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -79,65 +79,108 @@ static void zmain_lcd_init( void );
 int main( void )
 {
   // Turn off interrupts
-  osal_int_disable( INTS_ALL );
+  //¹Ø±Õ×ÜÖĞ¶Ï£¬OSAL API£¬ÎŞĞèĞŞ¸Ä
+  osal_int_disable( INTS_ALL ); //X
 
   // Initialization for board related stuff such as LEDs
-  HAL_BOARD_INIT();
+  //³õÊ¼»¯°åÔØµÄÏà¹ØÉè±¸£¬ÈçÊ±ÖÓÕñµ´Æ÷£¬»º´æÔ¤È¡¿ØÖÆ¡¢LED
+  //LED²¿·ÖµÄ´úÂëĞèÒªĞŞ¸Ä£¬¶Ë¿ÚÉèÖÃ²»Ò»Ñù¡£
+  //Ò²¾ÍÊÇhal_borad_cfg.hÕâ¸öÎÄ¼şºÜ¶à¶¼Òª¸ü¸Ä
+  HAL_BOARD_INIT(); //Y
 
   // Make sure supply voltage is high enough to run
-  zmain_vdd_check();
+  //µçÑ¹¼ì²é£¬È·±£Ğ¾Æ¬Õı³£ÔËĞĞµÄµçÑ¹¡£
+  //ÎŞĞèĞŞ¸Ä
+  zmain_vdd_check(); //X
 
   // Initialize board I/O
-  InitBoard( OB_COLD );
+  //Õâ¸öµØ·½Ã»Ê²Ã´ÓÃ£¬²ÎÊıÎªOB_COLD¾ÍÊÇÈ¥¼ì²âresetµÄÔ­Òò¡£
+  //Èç¹ûÈ·ÊµÊÇreset£¬ÈçµçÔ´¡¢Íâ²¿¡¢¿´ÃÅ¹·»òÕßÎ´ÖªµÄÔ­Òò£¬Ö´ĞĞÏàÓ¦µÄ´¦Àíº¯Êı
+  //Ìá¸ßÎÈ¶¨ĞÔµ¹ÊÇÍ¦ÓĞÓÃµÄ£¬È»¶øÄ¿Ç°Ã»Ê²Ã´ÓÃ
+  //²»ÓÃĞŞ¸Ä
+  InitBoard( OB_COLD ); //X
 
   // Initialze HAL drivers
-  HalDriverInit();
+  //³õÊ¼»¯Ó²¼ş£¬Ã»ÓĞÀí½âÎªÊ²Ã´LEDµÄ³õÊ¼»¯ÔÚÉÏÃæÓĞÁË£¬ÕâÀï»¹Òª³õÊ¼»¯Ò»±ßLED¡£
+  //²¢ÇÒ£¬ÎªÊ²Ã´ÒªÊ±ÖÓ,LED³õÊ¼»¯£¬ºÍÕâ¸ö·Ö¿ªÄØ£¿
+  //µ±È»£¬ÉÏÃæµÄÊÇ³õÊ¼»¯¶Ë¿Ú£¬ÕâÀïµÄÊÇ³õÊ¼»¯ĞĞÎª--Ãğ»òÕßÉÁË¸£¬µ«Ã»±ØÒª·Ö¿ªÑ½¡£
+  //»¹ÓĞÕâÀïÉèÖÃÁËKEYµÄSELºÍDIR£¬¶øÆäËû¹ØÓÚKEYµÄ²ÎÊıÉèÖÃÓÖ·Åµ½ÁËÏÂÃæ£¬ÕâÒ²Ì«Àí½â¡£
+  //ÄÑµÀÊÇÒòÎªÅÂÓÃ»§Îó²Ù×÷£¬ËùÒÔµÈËùÓĞÉèÖÃÍêÁËÔÙ½øĞĞKEYµÄÍêÈ«³õÊ¼»¯£¿
+  //ÒªĞŞ¸Ä¡£
+  HalDriverInit(); //Y
 
   // Initialize NV System
-  osal_nv_init( NULL );
+  //³õÊ¼»¯·ÇÒ×Ê§¼Ä´æÆ÷£¬Ò²¾ÍÊÇ¶ÔFLASEµÄ³õÊ¼»¯£¬ÎŞĞèĞŞ¸Ä
+  osal_nv_init( NULL ); //X
 
   // Initialize the MAC
-  ZMacInit();
+  //³õÊ¼»¯MAC²ã£¬ÎŞĞèĞŞ¸Ä
+  ZMacInit(); //X
 
   // Determine the extended address
-  zmain_ext_addr();
+  //ÅĞ¶ÏÎïÀíÍØÕ¹µØÖ·ÊÇ·ñºÏ·¨--²»¶®Ê²Ã´ÒâË¼£¬²»ÓÃ¸Ä¡£
+  zmain_ext_addr(); //X
 
 #if defined ZCL_KEY_ESTABLISH
   // Initialize the Certicom certificate information.
-  zmain_cert_init();
+  //Ã»µ÷ÓÃ£¬ÔİÇÒ²»¹Ü
+  zmain_cert_init(); //X
 #endif
 
   // Initialize basic NV items
-  zgInit();
+  //³õÊ¼»¯Z-stackÈ«¾Ö±äÁ¿£¬ÓÃNVÖĞµÄÖµ³õÊ¼»¯ÖÕ¶Ë
+  //²»Çå³ş³õÊ¼»¯ÁËÄÄĞ©È«¾Ö±äÁ¿£¬Ò²²»Çå³şÕâĞ©±äÁ¿ÓĞÊ²Ã´ÓÃ¡£
+  //ÎŞĞèĞŞ¸Ä
+  zgInit(); //X
 
 #ifndef NONWK
   // Since the AF isn't a task, call it's initialization routine
-  afInit();
+  //Õâ¸ö¾ÍÊÇÈç¹û½ûÖ¹ÁËNWK£¬APS£¬ZDOµÄº¯Êı¹¦ÄÜ£¬Òªµ¥¶À³õÊ¼»¯AF²ã
+  //Ã»ÓĞ½ûÓÃ£¬²»ÓÃ¹Ü
+  afInit(); //X
 #endif
 
   // Initialize the operating system
-  osal_init_system();
+  //³õÊ¼»¯²Ù×÷ÏµÍ³£¬ÏµÍ³APIº¯Êı£¬ºÍÓ²¼şÎŞ¹Ø
+  //²»ÓÃĞŞ¸Ä
+  osal_init_system(); //X
 
   // Allow interrupts
-  osal_int_enable( INTS_ALL );
+  //¿ªÆôËùÓĞÖĞ¶Ï£¬OSAL API
+  //ÎŞĞèĞŞ¸Ä
+  osal_int_enable( INTS_ALL ); //X
 
   // Final board initialization
-  InitBoard( OB_READY );
+  //´Ë´¦²ÎÊıÊÇOB_READY,¾ÍÊÇ¶ÔKEY½øĞĞÅäÖÃ£¬ÕâÀïÊÇÅäÖÃ£¬¶øÉÏÃæÊÇ³õÊ¼»¯KEYµÄ¶Ë¿Ú¡£
+  //ºÃÏñÓĞµãµÀÀí£¬²»¹ı»¹ÊÇ¾õµÃÊÇÅÂÓÃ»§Ã»ÔÚ³õÊ¼»¯Íê³ÉÇ°¾Í²Ù×÷·¢Éú´íÎó£¬²Å·ÅÔÚÕâÀï½øĞĞÅäÖÃµÄ¡£
+  //¶ÔKEY½øĞĞ»ñÈ¡·½Ê½ÅäÖÃ--É¨Ãè/ÖĞ¶Ï£¬ÒÔ¼°ÉèÖÃ»Øµ÷º¯Êı
+  //ĞèÒªĞŞ¸Ä
+  InitBoard( OB_READY ); //Y
 
   // Display information about this device
-  zmain_dev_info();
+  //ÏÔÊ¾Éè±¸µÄĞÅÏ¢£¬ĞèÒª¶¨ÒåLCD_SUPPORTEDÕâ¸ö±äÁ¿
+  //Ã»ÓĞ¶¨Òå£¬¾ÍÏàµ±ÓÚÕâ¸öº¯ÊıÃ»ÓĞÖ´ĞĞÈÎºÎ¹¦ÄÜ
+  //ÎŞĞèĞŞ¸Ä£¬µ«Òª°ÑoptionÀïµÄÕâ¸ö¶¨Òå¸øÉ¾ÁË
+  zmain_dev_info(); //X
 
   /* Display the device info on the LCD */
 #ifdef LCD_SUPPORTED
-  zmain_lcd_init();
+  //Ï¹ÆğÃû×Ö£¬ºÃÈÃÈËÎó½â£¬Õâ¸ö²¢²»ÊÇ³õÊ¼»¯LCDÓ²¼ş£¬
+  //ÊÇÖ¸³õÊ¼»¯ËûÏÔÊ¾µÄÄÚÈİ£¬ºÃ°É£¬×ĞÏ¸Àí½âÏÂ»¹ÊÇ¿ÉÒÔÀí½âµÄ
+  //²»¹ıÄãÉÏÒ»¸öº¯Êı¸ÕÏÔÊ¾ĞÅÏ¢£¬ÖĞ¼äÓÖÃ»ÓĞÑÓÊ±£¬ÉÏ¸öÏÔÊ¾²»¾Í·ÏÁË
+  //±ÈÈçLCDÏÔÊ¾Éè±¸ĞÅÏ¢¡£ÊÇCoordinator»¹ÊÇend device
+  //ÎŞĞèĞŞ¸Ä£¬Ã»LCD¡£
+  zmain_lcd_init(); //X
 #endif
 
 #ifdef WDT_IN_PM1
   /* If WDT is used, this is a good place to enable it. */
-  WatchDogEnable( WDTIMX );
+  //Ê¹ÄÜ¿´ÃÅ¹·£¬²»ÓÃ¸Ä¡£
+  WatchDogEnable( WDTIMX ); //X
 #endif
 
-  osal_start_system(); // No Return from here
+  //³õÊ¼»¯Íê±Ï£¬Æô¶¯Õû¸öOSALÏµÍ³£¬½øÈëËÀÑ­»·£¬ÎŞĞèĞŞ¸Ä
+  osal_start_system(); // No Return from here //X
 
   return 0;  // Shouldn't get here.
 } // main()
