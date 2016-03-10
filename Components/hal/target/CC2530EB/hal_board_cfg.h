@@ -396,7 +396,7 @@ st( \
 
 /* Set to TRUE enable LCD usage, FALSE disable it */
 #ifndef HAL_LCD
-#define HAL_LCD TRUE
+#define HAL_LCD FASLE
 #endif
 
 /* Set to TRUE enable LED usage, FALSE disable it */
