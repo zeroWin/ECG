@@ -142,6 +142,7 @@ int main( void )
 
   // Initialize the operating system
   //初始化操作系统，系统API函数，和硬件无关
+  //注册各层的服务函数,也就是tasksArr[]数组里函数对应的ID
   //不用修改
   osal_init_system(); //X
 

@@ -118,6 +118,9 @@ void HalLedInit (void)
 #if (HAL_LED == TRUE)
   /* Initialize all LEDs to OFF */
   HalLedSet (HAL_LED_ALL, HAL_LED_MODE_OFF);
+  //在这个地方，使用翻转代码无效，是因为在这个时候，osal还没有初始化，taskEvent数组
+  //和各层服务函数对应的taskid都没有注册，所以这里用这个代码，来向系统发送事件，根本是无效的。
+  //HalLedSet (HAL_LED_1, HAL_LED_MODE_FLASH);
 #endif /* HAL_LED */
 #ifdef BLINK_LEDS
   /* Initialize sleepActive to FALSE */
