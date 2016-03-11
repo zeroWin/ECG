@@ -142,6 +142,7 @@
 #define HAL_KEY_WORK_ICTLBIT  BV(7) /* P0IEN - P0.7 enable/disable bit */
 #define HAL_KEY_WORK_PXIFG    P0IFG /* Interrupt flag at source */
 
+//以后删掉
 #define HAL_KEY_JOY_CHN   HAL_ADC_CHANNEL_6
 
 
@@ -186,11 +187,11 @@ void HalKeyInit( void )
   halKeySavedKeys = 0;
 
   //之前理解有问题，IO中断不是第二功能，还是GPIO的功能，所以设置成GPIO
-  HAL_KEY_SW_6_SEL &= ~(HAL_KEY_SW_6_BIT);    /* Set pin function to GPIO */
-  HAL_KEY_SW_6_DIR &= ~(HAL_KEY_SW_6_BIT);    /* Set pin direction to Input */
+  HAL_KEY_LINK_SEL &= ~(HAL_KEY_LINK_BIT);    /* Set pin function to GPIO */
+  HAL_KEY_LINK_DIR &= ~(HAL_KEY_LINK_BIT);    /* Set pin direction to Input */
 
-  HAL_KEY_JOY_MOVE_SEL &= ~(HAL_KEY_JOY_MOVE_BIT); /* Set pin function to GPIO */
-  HAL_KEY_JOY_MOVE_DIR &= ~(HAL_KEY_JOY_MOVE_BIT); /* Set pin direction to Input */
+  HAL_KEY_WORK_SEL &= ~(HAL_KEY_WORK_BIT); /* Set pin function to GPIO */
+  HAL_KEY_WORK_DIR &= ~(HAL_KEY_WORK_BIT); /* Set pin direction to Input */
 
 
   /* Initialize callback function */
@@ -224,10 +225,10 @@ void HalKeyConfig (bool interruptEnable, halKeyCBack_t cback)
   {
     /* Rising/Falling edge configuratinn */
 
-    PICTL &= ~(HAL_KEY_SW_6_EDGEBIT);    /* Clear the edge bit */
+    PICTL &= ~(HAL_KEY_LINK_EDGEBIT);    /* Clear the edge bit */
     /* For falling edge, the bit must be set. */
-  #if (HAL_KEY_SW_6_EDGE == HAL_KEY_FALLING_EDGE)
-    PICTL |= HAL_KEY_SW_6_EDGEBIT;
+  #if (HAL_KEY_LINK_EDGE == HAL_KEY_FALLING_EDGE)
+    PICTL |= HAL_KEY_LINK_EDGEBIT;
   #endif
 
 
@@ -236,18 +237,18 @@ void HalKeyConfig (bool interruptEnable, halKeyCBack_t cback)
      * - Enable CPU interrupt
      * - Clear any pending interrupt
      */
-    HAL_KEY_SW_6_ICTL |= HAL_KEY_SW_6_ICTLBIT;
-    HAL_KEY_SW_6_IEN |= HAL_KEY_SW_6_IENBIT;
-    HAL_KEY_SW_6_PXIFG = ~(HAL_KEY_SW_6_BIT);
+    HAL_KEY_LINK_ICTL |= HAL_KEY_LINK_ICTLBIT;
+    HAL_KEY_LINK_IEN |= HAL_KEY_LINK_IENBIT;
+    HAL_KEY_LINK_PXIFG = ~(HAL_KEY_LINK_BIT);
 
 
 
     /* Rising/Falling edge configuratinn */
 
-    HAL_KEY_JOY_MOVE_ICTL &= ~(HAL_KEY_JOY_MOVE_EDGEBIT);    /* Clear the edge bit */
+    HAL_KEY_WORK_ICTL &= ~(HAL_KEY_WORK_EDGEBIT);    /* Clear the edge bit */
     /* For falling edge, the bit must be set. */
-  #if (HAL_KEY_JOY_MOVE_EDGE == HAL_KEY_FALLING_EDGE)
-    HAL_KEY_JOY_MOVE_ICTL |= HAL_KEY_JOY_MOVE_EDGEBIT;
+  #if (HAL_KEY_WORK_EDGE == HAL_KEY_FALLING_EDGE)
+    HAL_KEY_WORK_ICTL |= HAL_KEY_WORK_EDGEBIT;
   #endif
 
 
@@ -256,9 +257,9 @@ void HalKeyConfig (bool interruptEnable, halKeyCBack_t cback)
      * - Enable CPU interrupt
      * - Clear any pending interrupt
      */
-    HAL_KEY_JOY_MOVE_ICTL |= HAL_KEY_JOY_MOVE_ICTLBIT;
-    HAL_KEY_JOY_MOVE_IEN |= HAL_KEY_JOY_MOVE_IENBIT;
-    HAL_KEY_JOY_MOVE_PXIFG = ~(HAL_KEY_JOY_MOVE_BIT);
+    HAL_KEY_WORK_ICTL |= HAL_KEY_WORK_ICTLBIT;
+    HAL_KEY_WORK_IEN |= HAL_KEY_WORK_IENBIT;
+    HAL_KEY_WORK_PXIFG = ~(HAL_KEY_WORK_BIT);
 
 
     /* Do this only after the hal_key is configured - to work with sleep stuff */
@@ -269,8 +270,11 @@ void HalKeyConfig (bool interruptEnable, halKeyCBack_t cback)
   }
   else    /* Interrupts NOT enabled */
   {
-    HAL_KEY_SW_6_ICTL &= ~(HAL_KEY_SW_6_ICTLBIT); /* don't generate interrupt */
-    HAL_KEY_SW_6_IEN &= ~(HAL_KEY_SW_6_IENBIT);   /* Clear interrupt enable bit */
+    HAL_KEY_LINK_ICTL &= ~(HAL_KEY_LINK_ICTLBIT); /* don't generate interrupt */
+    HAL_KEY_LINK_IEN &= ~(HAL_KEY_LINK_IENBIT);   /* Clear interrupt enable bit */
+    
+    HAL_KEY_WORK_ICTL &= ~(HAL_KEY_WORK_ICTLBIT); /* don't generate interrupt */
+    HAL_KEY_WORK_IEN &= ~(HAL_KEY_WORK_IENBIT);   /* Clear interrupt enable bit */
 
     osal_set_event(Hal_TaskID, HAL_KEY_EVENT);
   }
