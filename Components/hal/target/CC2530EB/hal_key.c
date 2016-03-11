@@ -324,32 +324,14 @@ void HalKeyPoll (void)
 {
   uint8 keys = 0;
 
-  if ((HAL_KEY_JOY_MOVE_PORT & HAL_KEY_JOY_MOVE_BIT))  /* Key is active HIGH */
-  {
-    keys = halGetJoyKeyInput();
-  }
-
-  /* If interrupts are not enabled, previous key status and current key status
-   * are compared to find out if a key has changed status.
-   */
-  if (!Hal_KeyIntEnable)
-  {
-    if (keys == halKeySavedKeys)
-    {
-      /* Exit - since no keys have changed */
-      return;
-    }
-    /* Store the current keys for comparation next time */
-    halKeySavedKeys = keys;
-  }
-  else
-  {
-    /* Key interrupt handled here */
-  }
-
   if (HAL_PUSH_BUTTON1())
   {
-    keys |= HAL_KEY_SW_6;
+    keys |= HAL_KEY_SW_6; //P0.6 LINK_KEY
+  }
+  
+  if(HAL_PUSH_BUTTON2())
+  {
+    keys |= HAL_KEY_SW_7; //P0.7 WORK_KEY
   }
 
   /* Invoke Callback if new keys were depressed */
