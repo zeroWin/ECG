@@ -104,43 +104,43 @@
 #define HAL_KEY_DEBOUNCE_VALUE  25
 
 /* CPU port interrupt */
-#define HAL_KEY_CPU_PORT_0_IF P0IF
-#define HAL_KEY_CPU_PORT_2_IF P2IF
+#define HAL_KEY_WORK_CPU_PORT_0_IF P0IF
+#define HAL_KEY_LINK_CPU_PORT_0_IF P0IF
 
-/* SW_6 is at P0.1 */
-#define HAL_KEY_SW_6_PORT   P0
-#define HAL_KEY_SW_6_BIT    BV(1)
-#define HAL_KEY_SW_6_SEL    P0SEL
-#define HAL_KEY_SW_6_DIR    P0DIR
-
-/* edge interrupt */
-#define HAL_KEY_SW_6_EDGEBIT  BV(0)
-#define HAL_KEY_SW_6_EDGE     HAL_KEY_FALLING_EDGE
-
-
-/* SW_6 interrupts */
-#define HAL_KEY_SW_6_IEN      IEN1  /* CPU interrupt mask register */
-#define HAL_KEY_SW_6_IENBIT   BV(5) /* Mask bit for all of Port_0 */
-#define HAL_KEY_SW_6_ICTL     P0IEN /* Port Interrupt Control register */
-#define HAL_KEY_SW_6_ICTLBIT  BV(1) /* P0IEN - P0.1 enable/disable bit */
-#define HAL_KEY_SW_6_PXIFG    P0IFG /* Interrupt flag at source */
-
-/* Joy stick move at P2.0 */
-#define HAL_KEY_JOY_MOVE_PORT   P2
-#define HAL_KEY_JOY_MOVE_BIT    BV(0)
-#define HAL_KEY_JOY_MOVE_SEL    P2SEL
-#define HAL_KEY_JOY_MOVE_DIR    P2DIR
+/* Link key is at P0.6 */
+#define HAL_KEY_LINK_PORT   P0
+#define HAL_KEY_LINK_BIT    BV(6)
+#define HAL_KEY_LINK_SEL    P0SEL
+#define HAL_KEY_LINK_DIR    P0DIR
 
 /* edge interrupt */
-#define HAL_KEY_JOY_MOVE_EDGEBIT  BV(3)
-#define HAL_KEY_JOY_MOVE_EDGE     HAL_KEY_FALLING_EDGE
+#define HAL_KEY_LINK_EDGEBIT  BV(0)
+#define HAL_KEY_LINK_EDGE     HAL_KEY_FALLING_EDGE
 
-/* Joy move interrupts */
-#define HAL_KEY_JOY_MOVE_IEN      IEN2  /* CPU interrupt mask register */
-#define HAL_KEY_JOY_MOVE_IENBIT   BV(1) /* Mask bit for all of Port_2 */
-#define HAL_KEY_JOY_MOVE_ICTL     P2IEN /* Port Interrupt Control register */
-#define HAL_KEY_JOY_MOVE_ICTLBIT  BV(0) /* P2IENL - P2.0<->P2.3 enable/disable bit */
-#define HAL_KEY_JOY_MOVE_PXIFG    P2IFG /* Interrupt flag at source */
+
+/* LINK key interrupts */
+#define HAL_KEY_LINK_IEN      IEN1  /* CPU interrupt mask register */
+#define HAL_KEY_LINK_IENBIT   BV(5) /* Mask bit for all of Port_0 */
+#define HAL_KEY_LINK_ICTL     P0IEN /* Port Interrupt Control register */
+#define HAL_KEY_LINK_ICTLBIT  BV(6) /* P0IEN - P0.6 enable/disable bit */
+#define HAL_KEY_LINK_PXIFG    P0IFG /* Interrupt flag at source */
+
+/* Work key is at P0.7 */
+#define HAL_KEY_WORK_PORT   P0
+#define HAL_KEY_WORK_BIT    BV(7)
+#define HAL_KEY_WORK_SEL    P0SEL
+#define HAL_KEY_WORK_DIR    P0DIR
+
+/* edge interrupt */
+#define HAL_KEY_WORK_EDGEBIT  BV(0)
+#define HAL_KEY_WORK_EDGE     HAL_KEY_FALLING_EDGE
+
+/* Work key interrupts */
+#define HAL_KEY_WORK_IEN      IEN1  /* CPU interrupt mask register */
+#define HAL_KEY_WORK_IENBIT   BV(5) /* Mask bit for all of Port_0 */
+#define HAL_KEY_WORK_ICTL     P0IEN /* Port Interrupt Control register */
+#define HAL_KEY_WORK_ICTLBIT  BV(7) /* P0IEN - P0.7 enable/disable bit */
+#define HAL_KEY_WORK_PXIFG    P0IFG /* Interrupt flag at source */
 
 #define HAL_KEY_JOY_CHN   HAL_ADC_CHANNEL_6
 
