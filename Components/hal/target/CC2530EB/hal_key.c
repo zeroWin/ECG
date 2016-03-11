@@ -154,7 +154,6 @@
 /**************************************************************************************************
  *                                        GLOBAL VARIABLES
  **************************************************************************************************/
-static uint8 halKeySavedKeys;     /* used to store previous key state in polling mode */
 static halKeyCBack_t pHalKeyProcessFunction;
 static uint8 HalKeyConfigured;
 bool Hal_KeyIntEnable;            /* interrupt enable/disable flag */
