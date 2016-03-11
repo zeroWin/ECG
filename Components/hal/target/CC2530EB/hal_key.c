@@ -293,15 +293,15 @@ uint8 HalKeyRead ( void )
 {
   uint8 keys = 0;
 
-  if (HAL_PUSH_BUTTON1())
-  {
-    keys |= HAL_KEY_SW_6;
-  }
-
-  if ((HAL_KEY_JOY_MOVE_PORT & HAL_KEY_JOY_MOVE_BIT))  /* Key is active low */
-  {
-    keys |= halGetJoyKeyInput();
-  }
+//  if (HAL_PUSH_BUTTON1())
+//  {
+//    keys |= HAL_KEY_SW_6;
+//  }
+//
+//  if ((HAL_KEY_JOY_MOVE_PORT & HAL_KEY_JOY_MOVE_BIT))  /* Key is active low */
+//  {
+//    keys |= halGetJoyKeyInput();
+//  }
 
   return keys;
 }
