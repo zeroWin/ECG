@@ -490,7 +490,8 @@ HAL_ISR_FUNCTION( halKeyPort0Isr, P0INT_VECTOR )
 {
   HAL_ENTER_ISR();
 
-  if (HAL_KEY_SW_6_PXIFG & HAL_KEY_SW_6_BIT)
+  if ((HAL_KEY_LINK_PXIFG & HAL_KEY_LINK_BIT) 
+      || (HAL_KEY_WORK_PXIFG & HAL_KEY_WORK_BIT))
   {
     halProcessKeyInterrupt();
   }
@@ -499,40 +500,12 @@ HAL_ISR_FUNCTION( halKeyPort0Isr, P0INT_VECTOR )
     Clear the CPU interrupt flag for Port_0
     PxIFG has to be cleared before PxIF
   */
-  HAL_KEY_SW_6_PXIFG = 0;
-  HAL_KEY_CPU_PORT_0_IF = 0;
+  HAL_KEY_LINK_PXIFG = 0;
+  HAL_KEY_LINK_CPU_PORT_0_IF = 0;
   
-  CLEAR_SLEEP_MODE();
-  HAL_EXIT_ISR();
-}
-
-
-/**************************************************************************************************
- * @fn      halKeyPort2Isr
- *
- * @brief   Port2 ISR
- *
- * @param
- *
- * @return
- **************************************************************************************************/
-HAL_ISR_FUNCTION( halKeyPort2Isr, P2INT_VECTOR )
-{
-  HAL_ENTER_ISR();
+  HAL_KEY_WORK_PXIFG = 0;
+  HAL_KEY_WORK_CPU_PORT_0_IF = 0;
   
-  if (HAL_KEY_JOY_MOVE_PXIFG & HAL_KEY_JOY_MOVE_BIT)
-  {
-    halProcessKeyInterrupt();
-  }
-
-  /*
-    Clear the CPU interrupt flag for Port_2
-    PxIFG has to be cleared before PxIF
-    Notes: P2_1 and P2_2 are debug lines.
-  */
-  HAL_KEY_JOY_MOVE_PXIFG = 0;
-  HAL_KEY_CPU_PORT_2_IF = 0;
-
   CLEAR_SLEEP_MODE();
   HAL_EXIT_ISR();
 }
