@@ -132,7 +132,7 @@
 
 /* S2- Work key Press P0.7 */
 #define PUSH2_BV          BV(7)
-#define PUSH2_SBIT        P2_7
+#define PUSH2_SBIT        P0_7
 
 #define PUSH2_POLARITY    ACTIVE_LOW
 
