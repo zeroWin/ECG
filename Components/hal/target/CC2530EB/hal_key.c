@@ -427,15 +427,15 @@ void halProcessKeyInterrupt (void)
 {
   bool valid=FALSE;
 
-  if (HAL_KEY_SW_6_PXIFG & HAL_KEY_SW_6_BIT)  /* Interrupt Flag has been set */
+  if (HAL_KEY_LINK_PXIFG & HAL_KEY_LINK_BIT)  /* Interrupt Flag has been set */
   {
-    HAL_KEY_SW_6_PXIFG = ~(HAL_KEY_SW_6_BIT); /* Clear Interrupt Flag */
+    HAL_KEY_LINK_PXIFG = ~(HAL_KEY_LINK_BIT); /* Clear Interrupt Flag */
     valid = TRUE;
   }
 
-  if (HAL_KEY_JOY_MOVE_PXIFG & HAL_KEY_JOY_MOVE_BIT)  /* Interrupt Flag has been set */
+  if (HAL_KEY_WORK_PXIFG & HAL_KEY_WORK_BIT)  /* Interrupt Flag has been set */
   {
-    HAL_KEY_JOY_MOVE_PXIFG = ~(HAL_KEY_JOY_MOVE_BIT); /* Clear Interrupt Flag */
+    HAL_KEY_WORK_PXIFG = ~(HAL_KEY_WORK_BIT); /* Clear Interrupt Flag */
     valid = TRUE;
   }
 
