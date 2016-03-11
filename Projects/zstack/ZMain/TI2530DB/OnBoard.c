@@ -272,6 +272,12 @@ void OnBoard_KeyCallback ( uint8 keys, uint8 state )
     // Process SW6 here
     if ( keys & HAL_KEY_SW_6 )  // Switch 6
     {
+      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+    }
+    // Process SW7 here
+    if ( keys & HAL_KEY_SW_7 )  // Switch 7
+    {
+      HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
     }
   }
 }
