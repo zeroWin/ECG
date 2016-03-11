@@ -182,9 +182,6 @@ uint8 halGetJoyKeyInput(void);
  **************************************************************************************************/
 void HalKeyInit( void )
 {
-  /* Initialize previous key to 0 */
-  halKeySavedKeys = 0;
-
   //之前理解有问题，IO中断不是第二功能，还是GPIO的功能，所以设置成GPIO
   HAL_KEY_LINK_SEL &= ~(HAL_KEY_LINK_BIT);    /* Set pin function to GPIO */
   HAL_KEY_LINK_DIR &= ~(HAL_KEY_LINK_BIT);    /* Set pin direction to Input */
