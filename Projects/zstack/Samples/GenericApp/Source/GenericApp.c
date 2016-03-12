@@ -78,6 +78,7 @@
 #include "hal_led.h"
 #include "hal_key.h"
 #include "hal_uart.h"
+#include "hal_oled.h"
 
 /*********************************************************************
  * MACROS
@@ -389,12 +390,14 @@ void GenericApp_HandleKeys( byte shift, byte keys )
   if(keys & HAL_KEY_SW_6)
   {
     HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+    HalOledShowChar(0,0,'a',12,1);
   }
   if(keys & HAL_KEY_SW_7)
   {
     HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
+    HalOledShowChar(0,0,'b',12,1);
   }
-  
+  HalOledRefreshGram();
     
 }
 
