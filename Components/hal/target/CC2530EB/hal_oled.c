@@ -188,10 +188,6 @@ void HalOledInit(void)
 	 
   writec(0xAF);    //display on
   HalOledClear();
-  
-  HalOledShowChar(0,0,'a',12,1);
-    HalOledRefreshGram();
-      HalOledRefreshGram();
 }
 
 
