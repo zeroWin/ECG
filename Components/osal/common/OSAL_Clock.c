@@ -21,7 +21,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED “AS IS?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -153,35 +153,51 @@ static void osalClockUpdate( uint16 elapsedMSec );
 void osalTimeUpdate( void )
 {
   halIntState_t intState;
-  uint32 tmp;
-  uint32 ticks320us;
+  uint32 tmp;         //´æ·ÅÁÙÊ±±äÁ¿
+  uint32 ticks320us;  //´æ·Åtimer2Òç³öµÄ´ÎÊı£¬Ã¿320usÒç³öÒ»´Î
   uint16 elapsedMSec = 0;
 
   HAL_ENTER_CRITICAL_SECTION(intState);
   // Get the free-running count of 320us timer ticks
+  // Í³¼Æ¶¨Ê±Æ÷Òç³öµÄ´ÎÊı£¬Ã¿320usÒç³öÒ»´Î£¬Ò²¾ÍÊÇËµ
+  // Í³¼ÆÓĞ¶àÉÙ¸ö320us
   tmp = macMcuPrecisionCount();
   HAL_EXIT_CRITICAL_SECTION(intState);
   
-  if ( tmp != previousMacTimerTick )
+  // Òç³ö´ÎÊıºÍÉÏ´Î²»ÓÃ£¬Ò²¾ÍÊÇÖÁÉÙÓĞÒ»¸ö320us¾­¹ı
+  if ( tmp != previousMacTimerTick ) 
   {
     // Calculate the elapsed ticks of the free-running timer.
+    // Ä¿Ç°Öµ-ÉÏÒ»´ÎÖµ£¬Ò²¾ÍÊÇ´úÂëÔÙ´ÎÔËĞĞµ½ÕâÀï¾­¹ıÁË¶àÉÙ¸ö320us
     ticks320us = tmp - previousMacTimerTick;
 
     // Store the MAC Timer tick count for the next time through this function.
+    // ´æ´¢µ±Ç°Öµ£¬ÎªÏÂÒ»´Î³ÌĞò½øÈëif×ö×¼±¸
     previousMacTimerTick = tmp;
     
     // update converted number with remaining ticks from loop and the
     // accumulated remainder from loop
+    // 320us*T320 = 1000us*T1000 
+    // --> T1000 = (320/1000)*T320
+    // --> T1000 = (8/25)*T320
+    // remUsTicks = T320*8%25us
+    // elapsedMSec += T320*8/25ms
     tmp = (ticks320us * 8) + remUsTicks;
 
     // Convert the 320 us ticks into milliseconds and a remainder
+    // Ò²¾ÍÊÇÖ´ĞĞ
+    // remUsTicks = T320*8%25us
+    // elapsedMSec += T320*8/25ms
+    // ¸Ğ¾õÕâ¸ö+Ã»Ê²Ã´ÒâÒå
+    // Ã¿´Î½øÈëÕâ¸öº¯ÊıelapsedMSec¶¼ÊÇ¸³Öµ0µÄ£¬Ò²²»ÊÇÈ«¾Ö£¬Ò²²»ÊÇstatic
+    // ÕâÀï+Ô­À´µÄÖµÒ²ÊÇ0Ñ½
     CONVERT_320US_TO_MS_ELAPSED_REMAINDER( tmp, elapsedMSec, remUsTicks );
 
     // Update OSAL Clock and Timers
-    if ( elapsedMSec )
+    if ( elapsedMSec )//Èç¹û´óÓÚµÈÓÚ1ms£¬½øÈë
     {
-      osalClockUpdate( elapsedMSec );
-      osalTimerUpdate( elapsedMSec );
+      osalClockUpdate( elapsedMSec ); //¸üĞÂÏµÍ³Ê±¼ä
+      osalTimerUpdate( elapsedMSec ); //ÈÎÎñµÄÂÖÑ¯µ÷¶È
     }
   }
 }
