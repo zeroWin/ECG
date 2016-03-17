@@ -38,23 +38,7 @@
 ******************************************************************************/
 
 /*********************************************************************
-  This application isn't intended to do anything useful, it is
-  intended to be a simple example of an application's structure.
-
-  This application sends "Hello World" to another "Generic"
-  application every 15 seconds.  The application will also
-  receive "Hello World" packets.
-
-  The "Hello World" messages are sent/received as MSG type message.
-
-  This applications doesn't have a profile, so it handles everything
-  directly - itself.
-
-  Key control:
-    SW1:
-    SW2:  initiates end device binding
-    SW3:
-    SW4:  initiates a match description request
+  This application is for ECG
 *********************************************************************/
 
 /*********************************************************************
