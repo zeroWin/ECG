@@ -118,7 +118,7 @@ int main( void )
   ZMacInit(); //X
 
   // Determine the extended address
-  //判断物理拓展地址是否合法--不懂什么意思，不用改。
+  //这个函数就是获取设备的IEEE地址
   zmain_ext_addr(); //X
 
 #if defined ZCL_KEY_ESTABLISH
