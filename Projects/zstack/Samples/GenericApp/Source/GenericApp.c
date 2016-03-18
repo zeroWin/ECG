@@ -412,6 +412,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
+      HalOledRefreshGram();
       break;
   }
 }
