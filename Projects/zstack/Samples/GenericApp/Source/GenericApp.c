@@ -260,9 +260,9 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
               || (GenericApp_NwkState == DEV_END_DEVICE) )
           {
             // Start sending "the" message in a regular interval.
-            osal_start_timerEx( GenericApp_TaskID,
-                                GENERICAPP_SEND_MSG_EVT,
-                                GENERICAPP_SEND_MSG_TIMEOUT );
+//            osal_start_timerEx( GenericApp_TaskID,
+//                                GENERICAPP_SEND_MSG_EVT,
+//                                GENERICAPP_SEND_MSG_TIMEOUT );
           }
           break;
 
@@ -374,7 +374,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
   if(keys & HAL_KEY_SW_6)
   {
     HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
-    HalOledShowChar(0,0,'a',12,1);
+    HalOledShowNum(0,0,_NIB.nwkPanId,7,16);
   }
   if(keys & HAL_KEY_SW_7)
   {
@@ -411,6 +411,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #elif defined( WIN32 )
       WPRINTSTR( pkt->cmd.Data );
 #endif
+      HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
       break;
   }
 }
