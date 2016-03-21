@@ -376,7 +376,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
     HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
     HalOledShowNum(0,0,_NIB.nwkPanId,5,16);
     HalOledShowNum(50,0,_NIB.nwkDevAddress,5,16);  
-    HalOledShowNum(0,20,_NIB.nwkCoordAddress,5,16);  
+    HalOledShowNum(0,15,_NIB.nwkCoordAddress,1,16);  
   }
   if(keys & HAL_KEY_SW_7)
   {
@@ -414,6 +414,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
+      HalOledShowString(20,15,16,"V0.14");
       HalOledRefreshGram();
       break;
   }
