@@ -374,7 +374,9 @@ void GenericApp_HandleKeys( byte shift, byte keys )
   if(keys & HAL_KEY_SW_6)
   {
     HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
-    HalOledShowNum(0,0,_NIB.nwkPanId,7,16);
+    HalOledShowNum(0,0,_NIB.nwkPanId,5,16);
+    HalOledShowNum(50,0,_NIB.nwkDevAddress,5,16);  
+    HalOledShowNum(0,20,_NIB.nwkCoordAddress,5,16);  
   }
   if(keys & HAL_KEY_SW_7)
   {
