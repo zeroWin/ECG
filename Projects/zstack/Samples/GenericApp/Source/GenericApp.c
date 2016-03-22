@@ -88,7 +88,7 @@ const cId_t GenericApp_ClusterList[GENERICAPP_MAX_CLUSTERS] =
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
 {
-  GENERICAPP_ENDPOINT,              //  int Endpoint;
+  GENERICAPP_ENDPOINT,          //  int Endpoint;
   GENERICAPP_PROFID,                //  uint16 AppProfId[2];
   GENERICAPP_DEVICEID,              //  uint16 AppDeviceId[2];
   GENERICAPP_DEVICE_VERSION,        //  int   AppDevVer:4;
@@ -414,7 +414,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
-      HalOledShowString(20,15,16,"V0.14");
+      HalOledShowString(20,15,16,"V0.15");
       HalOledRefreshGram();
       break;
   }
