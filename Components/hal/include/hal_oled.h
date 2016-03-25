@@ -66,37 +66,37 @@ extern "C"
 /*
  * Initialize OLED Service.
  */
-void HalOledInit(void);
+extern void HalOledInit(void);
 
 /*
  * Clear OLED.
  */
-void HalOledClear(void);
+extern void HalOledClear(void);
 
 /*
  * Show a char on OLED.
  */
-void HalOledShowChar(uint8 x,uint8 y,uint8 chr,uint8 size,uint8 mode);
+extern void HalOledShowChar(uint8 x,uint8 y,uint8 chr,uint8 size,uint8 mode);
 
 /*
  * Show a num on OLED.
  */
-void HalOledShowNum(uint8 x,uint8 y,uint32 num,uint8 len,uint8 size);
+extern void HalOledShowNum(uint8 x,uint8 y,uint32 num,uint8 len,uint8 size);
 
 /*
  * Show string on OLED.
  */
-void HalOledShowString(uint8 x,uint8 y,uint8 size,const uint8 *p);  
+extern void HalOledShowString(uint8 x,uint8 y,uint8 size,const uint8 *p);  
   
 /*
  * Refresh OLED.
  */
-void HalOledRefreshGram(void);
+extern void HalOledRefreshGram(void);
 
 /*
  * Set the OLED ON/OFF.
  */
-void HalOledOnOff(uint8 mode);
+extern void HalOledOnOff(uint8 mode);
   
 #ifdef __cplusplus
 }
