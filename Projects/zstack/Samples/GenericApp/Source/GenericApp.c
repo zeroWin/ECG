@@ -446,7 +446,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
-      HalOledShowString(20,15,16,"V0.31");
+      HalOledShowString(20,15,16,"V0.32");
       HalOledRefreshGram();
       if( strcmp((char*)pkt->cmd.Data,"Start") == 0 )
       {
