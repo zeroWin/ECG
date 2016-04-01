@@ -409,11 +409,30 @@ void GenericApp_HandleKeys( byte shift, byte keys )
     HalOledShowNum(0,0,_NIB.nwkPanId,5,16);
     HalOledShowNum(50,0,_NIB.nwkDevAddress,5,16);  
     HalOledShowNum(0,15,_NIB.nwkCoordAddress,1,16);  
+    
+    NLME_LeaveReq_t leaveReq;
+
+ osal_memset((uint8 *)&leaveReq,0,sizeof(NLME_LeaveReq_t));
+
+ osal_memcpy(leaveReq.extAddr,NLME_GetExtAddr(),Z_EXTADDR_LEN);
+
+ leaveReq.removeChildren = FALSE; // Only false shoule be use.
+
+ leaveReq.rejoin = TRUE;   //
+
+ leaveReq.silent = TRUE;
+
+ NLME_LeaveReq( &leaveReq );
+    
+    
   }
   if(keys & HAL_KEY_SW_7)
   {
     HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
     HalOledShowChar(0,0,'b',12,1);
+    //改成别的方法。
+    //ZDApp_StartJoiningCycle();
+    ZDOInitDevice(0);
   }
   HalOledRefreshGram();
     

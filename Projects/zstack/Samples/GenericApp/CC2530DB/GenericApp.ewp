@@ -2391,6 +2391,7 @@
         <option>
           <name>CCDefines</name>
           <state>NWK_AUTO_POLL</state>
+          <state>HOLD_AUTO_START</state>
           <state>ZTOOL_P1</state>
           <state>xMT_TASK</state>
           <state>xMT_SYS_FUNC</state>
