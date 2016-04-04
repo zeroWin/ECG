@@ -444,9 +444,14 @@ st( \
 #define HAL_LCD FASLE
 #endif
 
-/* Set to TRUE enable LCD usage, FALSE disable it */
+/* Set to TRUE enable OLED usage, FALSE disable it */
 #ifndef HAL_OLED
 #define HAL_OLED TRUE
+#endif
+
+/* Set to TRUE enable batter monitor usage, FALSE disable it */
+#ifndef HAL_BATTERY_MONITOR
+#define HAL_BATTERY_MONITOR FALSE
 #endif
 
 /* Set to TRUE enable LED usage, FALSE disable it */
