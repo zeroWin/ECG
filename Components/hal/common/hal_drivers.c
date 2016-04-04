@@ -173,6 +173,11 @@ void HalDriverInit (void)
   HalOledInit();
 #endif
 
+  /* Battery Monitor */
+#if (defined HAL_BATTERY_MONITOR) && (HAL_BATTERY_MONITOR == TRUE)
+  HalBattMonInit();
+#endif
+  
   /* SPI */
 #if (defined HAL_SPI) && (HAL_SPI == TRUE)
   HalSpiInit();
