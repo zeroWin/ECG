@@ -65,9 +65,9 @@ extern "C"
  **************************************************************************************************/
 
 /*
- * Initialize Battery Monitor.
+ * Initialize ECG measure.
  */
-
+void HalEcgMeasInit(void);
 
 #ifdef __cplusplus
 }

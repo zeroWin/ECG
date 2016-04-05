@@ -43,7 +43,7 @@
  *                                             INCLUDES
  ***************************************************************************************************/
 #include "hal_ecg_measure.h"
-
+#include "hal_led.h"
 
 #if (defined HAL_ECG_MEASURE) && (HAL_ECG_MEASURE == TRUE)
 /***************************************************************************************************
@@ -77,14 +77,26 @@
 
 
 /**************************************************************************************************
- * @fn      HalBattMonInit
+ * @fn      HalEcgMeasInit
  *
- * @brief   Initilize Battery Monitor
+ * @brief   Initilize ECG measure
  *
  * @param   none
  *
  * @return  None
  **************************************************************************************************/
+void HalEcgMeasInit(void)
+{
+  //设置定时器
+  T1CTL = 0x0f;   //DIV 128; Up/Down 模式;
+  T1CC0H = 0xFF;
+  T1CC0L = 0xFF;  //0x01F4:周期为4ms；0x0271:周期为5ms;0x03E8:周期为8ms;0x04E2:周期为10ms;0x09C4:周期为20ms
+  
+  IEN1  |= 0x02;  //bit1:T1IE
+  //T1OVFIM = 0;    //T1 overflow interrupt mask
+}
+
+
 
 /***************************************************************************************************
  *                                    INTERRUPT SERVICE ROUTINE
@@ -102,9 +114,10 @@
 HAL_ISR_FUNCTION( halTimer1Isr, T1_VECTOR )
 {
   HAL_ENTER_ISR();
-
   
-  halProcessTimer1Interrupt();
+
+  HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+  //halProcessTimer1Interrupt();
   
   HAL_EXIT_ISR();
 }
