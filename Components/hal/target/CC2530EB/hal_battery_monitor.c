@@ -3,7 +3,7 @@
   Revised:        $Date: 2016-03-12 19:37:16 +0800 (Sat, 12 Mar 2016) $
   Revision:       $Revision: 1 $
 
-  Description:    This file contains the interface to the OLED Service.
+  Description:    This file contains the interface to the battery monitor.
 
 
   Copyright 2016 Bupt. All rights reserved.
