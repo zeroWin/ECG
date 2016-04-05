@@ -50,7 +50,6 @@
 #endif
 #include "hal_key.h"
 #include "hal_lcd.h"
-#include "hal_oled.h"
 #include "hal_led.h"
 #include "hal_timer.h"
 #include "hal_uart.h"
@@ -70,6 +69,10 @@
   #include "mac_rx.h"
 #endif
 
+// user header file
+#include "hal_oled.h"
+#include "hal_battery_monitor.h"
+#include "hal_ecg_measure.h"
 /**************************************************************************************************
  *                                            MACROS
  **************************************************************************************************/
@@ -177,6 +180,11 @@ void HalDriverInit (void)
 #if (defined HAL_BATTERY_MONITOR) && (HAL_BATTERY_MONITOR == TRUE)
   HalBattMonInit();
 #endif
+  
+  /* ECG Measure */
+#if (defined HAL_ECG_MEASURE) && (HAL_ECG_MEASURE == TRUE)
+  HalEcgMeasInit();
+#endif  
   
   /* SPI */
 #if (defined HAL_SPI) && (HAL_SPI == TRUE)

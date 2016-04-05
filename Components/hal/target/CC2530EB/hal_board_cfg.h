@@ -454,6 +454,11 @@ st( \
 #define HAL_BATTERY_MONITOR FALSE
 #endif
 
+/* Set to TRUE enable ECG measure usage, FALSE disable it */
+#ifndef HAL_ECG_MEASURE
+#define HAL_ECG_MEASURE TRUE
+#endif
+
 /* Set to TRUE enable LED usage, FALSE disable it */
 #ifndef HAL_LED
 #define HAL_LED TRUE
