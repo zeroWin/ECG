@@ -58,16 +58,66 @@ extern "C"
 /**************************************************************************************************
  *                                            CONSTANTS
  **************************************************************************************************/
+/* Timer clock pre-scaler definitions for 16bit timer1 */
+#define HAL_TIMER1_16_TC_DIV1     0x00  /* No clock pre-scaling */
+#define HAL_TIMER1_16_TC_DIV8     0x04  /* Clock pre-scaled by 8 */
+#define HAL_TIMER1_16_TC_DIV32    0x08  /* Clock pre-scaled by 32 */
+#define HAL_TIMER1_16_TC_DIV128   0x0c  /* Clock pre-scaled by 128 */
+#define HAL_TIMER1_16_TC_BITS     0x0c  /* Bits 3:2 */
+  
+/* Operation Mode definitions */
+#define HAL_TIMER1_OPMODE_STOP      0x00  /* Free Running Mode, Count from 0 to Max */
+#define HAL_TIMER1_OPMODE_FREERUN   0x01  /* Free Running Mode, Count from 0 to Max */
+#define HAL_TIMER1_OPMODE_MODULO    0x02  /* Modulo Mode, Count from 0 to CompareValue */
+#define HAL_TIMER1_OPMODE_UP_DOWN   0x03  /* up-down Mode, Count from 0 to CompareValue to 0*/
+#define HAL_TIMER1_OPMODE_BITS      0x03  /* Bits 1:0 */
+  
+/* Prescale settings 
+ * 这里的值用于设置分频和计算计数值用，二者要对应，不然计算会出错 
+ * count = (clock * time)/ div
+ * 修改分频值在这里修改
+ */
+#define HAL_TIMER1_16_PRESCALE      HAL_TIMER1_16_TC_DIV128
+#define HAL_TIMER1_16_PRESCALE_VAL  128
+  
+/* Clock settings */
+#define HAL_TIMER_32MHZ             32
+  
+/* mode setting 
+ * 修改计数模式在这里修改 
+ */
+#define HAL_TIMER1_16_OPMODE        HAL_TIMER1_OPMODE_UP_DOWN
+  
+/***************************************************************************************************
+ *                                             TYPEDEFS
+ ***************************************************************************************************/
+typedef void (*halEcgMeasCBack_t) (void);
 
- 
 /**************************************************************************************************
  *                                             FUNCTIONS - API
  **************************************************************************************************/
 
 /*
- * Initialize ECG measure.
+ * Initialize ECG measure timer and port config.
  */
-void HalEcgMeasInit(void);
+extern void HalEcgMeasInit(void);
+
+/*
+ * ECG measure config.
+ */
+extern void HalEcgMeasConfig( halEcgMeasCBack_t cBack );
+
+/*
+ * Start ECG measure. 选择模模式-最大262140us-0.26s 选择up-down模式-最大524280us=0.52s
+ * 输入为微秒数
+ */
+extern void HalEcgMeasStart(uint32 timePerTick);
+
+
+/*
+ * Stop ECG measure.
+ */
+extern void HalEcgMeasStop(void);
 
 #ifdef __cplusplus
 }

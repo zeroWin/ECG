@@ -44,11 +44,28 @@
  ***************************************************************************************************/
 #include "hal_ecg_measure.h"
 #include "hal_led.h"
+#include "hal_timer.h"
 
 #if (defined HAL_ECG_MEASURE) && (HAL_ECG_MEASURE == TRUE)
 /***************************************************************************************************
  *                                             CONSTANTS
  ***************************************************************************************************/
+#define HW_TIMER_1        0x00
+#define HW_TIMER_MAX      0x01
+
+#define IEN1_T1IE     0x02    /* Timer1 Interrupt Enable bit*/
+#define TIMIF_T1OVFIM 0x40    /* Timer1 overflow Enable bit*/
+  
+#define T1STAT_OVFIF  0x10    /* Timer1 overflow interrupt flag */
+
+
+/* Default all timers to use channel 0 */
+#define TCHN_T1CCTL   &(X_T1CCTL0)
+#define TCHN_T1CCL    &(X_T1CC0L)
+#define TCHN_T1CCH    &(X_T1CC0H)
+#define TCNH_T1OVF    &(X_TIMIF)
+#define TCHN_T1OVFBIT TIMIF_T1OVFIM
+#define TCHN_T1INTBIT IEN1_T1IE
 
 
 /***************************************************************************************************
@@ -59,7 +76,31 @@
 /***************************************************************************************************
  *                                              TYPEDEFS
  ***************************************************************************************************/
+typedef struct
+{
+	bool configured;      //--TRUE
+	bool intEnable;       //--enable
+	uint8 opMode;         // user choose on macro define
+	uint8 channel;        // don't use 
+	uint8 channelMode;    // don't use
+	uint8 prescale;       // user choose on macro define
+	uint8 prescaleVal;    // user choose on macro define
+	uint8 clock;          // user choose on macro define
+	halEcgMeasCBack_t callBackFunc; // user choose when use api
+} halTimerSettings_t;
 
+typedef struct
+{
+	uint8 volatile XDATA *TxCCTL;
+	uint8 volatile XDATA *TxCCH;
+	uint8 volatile XDATA *TxCCL;
+	uint8 volatile XDATA *TxOVF;
+	uint8 ovfbit;
+	uint8 intbit;
+} halTimerChannel_t;
+
+static halTimerSettings_t halTimerRecord[HW_TIMER_MAX];
+static halTimerChannel_t  halTimerChannel[HW_TIMER_MAX];
 /**************************************************************************************************
  *                                        INNER GLOBAL VARIABLES
  **************************************************************************************************/
@@ -69,7 +110,10 @@
 /**************************************************************************************************
  *                                        FUNCTIONS - Local
  **************************************************************************************************/
-
+uint8 halTimerSetCount(uint8 hwtimerid, uint32 timePerTick);
+uint8 halTimerSetPrescale(uint8 hwtimerid, uint8 prescale);
+uint8 halTimerSetOpMode(uint8 hwtimerid, uint8 opMode);
+uint8 HalTimerInterruptEnable(uint8 hwtimerid, uint8 channelMode, bool enable);
 
 /**************************************************************************************************
  *                                        FUNCTIONS - API
@@ -79,7 +123,7 @@
 /**************************************************************************************************
  * @fn      HalEcgMeasInit
  *
- * @brief   Initilize ECG measure
+ * @brief   Initilize ECG measure. Timer and port service
  *
  * @param   none
  *
@@ -87,15 +131,279 @@
  **************************************************************************************************/
 void HalEcgMeasInit(void)
 {
-  //设置定时器
-  T1CTL = 0x0f;   //DIV 128; Up/Down 模式;
-  T1CC0H = 0xFF;
-  T1CC0L = 0xFF;  //0x01F4:周期为4ms；0x0271:周期为5ms;0x03E8:周期为8ms;0x04E2:周期为10ms;0x09C4:周期为20ms
+  // 定时器初始化
+  /* Setup prescale & clock for timer1 */  
+  halTimerRecord[HW_TIMER_1].prescale = HAL_TIMER1_16_PRESCALE;
+  halTimerRecord[HW_TIMER_1].clock = HAL_TIMER_32MHZ;
+  halTimerRecord[HW_TIMER_1].prescaleVal = HAL_TIMER1_16_PRESCALE_VAL;
   
-  IEN1  |= 0x02;  //bit1:T1IE
-  //T1OVFIM = 0;    //T1 overflow interrupt mask
+  /* Setup Timer1 register */
+  halTimerChannel[HW_TIMER_1].TxCCTL = TCHN_T1CCTL;   /* 使用溢出模式，该寄存器无用 */
+  halTimerChannel[HW_TIMER_1].TxCCL = TCHN_T1CCL;     /* 比较值寄存器 低8位 */
+  halTimerChannel[HW_TIMER_1].TxCCH = TCHN_T1CCH;     /* 比较值寄存器 高8位 */
+  halTimerChannel[HW_TIMER_1].TxOVF = TCNH_T1OVF;     /* Timers 1/3/4 Interrupt Mask/Flag register bit6为Timer 1 overflow interrupt mask */
+  halTimerChannel[HW_TIMER_1].ovfbit = TCHN_T1OVFBIT; /* bit6:TCHN_T1OVFBIT = 0x40 */
+  halTimerChannel[HW_TIMER_1].intbit = TCHN_T1INTBIT; /* IEN1-bit2:TCHN_T1INTBIT = 0x02 */
+  
+  
+  // AD8232 端口初始化
+  
 }
 
+/***************************************************************************************************
+* @fn      HalEcgMeasConfig
+*
+* @brief   Configure the ECG measure Serivce
+*
+* @param   cBack - Pointer to the callback function
+*
+* @return 
+***************************************************************************************************/
+void HalEcgMeasConfig( halEcgMeasCBack_t cBack )
+{
+  halTimerRecord[HW_TIMER_1].configured = TRUE;
+  halTimerRecord[HW_TIMER_1].opMode = HAL_TIMER1_16_OPMODE;
+  halTimerRecord[HW_TIMER_1].intEnable = TRUE;
+  halTimerRecord[HW_TIMER_1].callBackFunc = cBack;
+}
+
+
+/***************************************************************************************************
+* @fn      HalEcgMeasStart
+*
+* @brief   Start the Ecg Meas Service
+*
+* @param   timerPerTick - number of micro sec per tick, (ticks x prescale) / clock = usec/tick
+*
+* @return  
+***************************************************************************************************/
+void HalEcgMeasStart(uint32 timePerTick)
+{
+  if( halTimerRecord[HW_TIMER_1].configured )
+  {
+    if( halTimerRecord[HW_TIMER_1].opMode == HAL_TIMER1_OPMODE_UP_DOWN )
+      halTimerSetCount(HW_TIMER_1,timePerTick/2);
+    else
+      halTimerSetCount(HW_TIMER_1,timePerTick);
+    
+    halTimerSetPrescale(HW_TIMER_1,halTimerRecord[HW_TIMER_1].prescale);
+    halTimerSetOpMode(HW_TIMER_1,halTimerRecord[HW_TIMER_1].opMode);
+    
+    // enable interruput
+    HalTimerInterruptEnable(HW_TIMER_1, HAL_TIMER_CH_MODE_OVERFLOW, halTimerRecord[HW_TIMER_1].intEnable );
+  }
+}
+
+
+/***************************************************************************************************
+* @fn      HalEcgMeasStop
+*
+* @brief   Stop the Ecg Meas Service
+*
+* @param   timerId - ID of the timer
+*
+* @return  
+***************************************************************************************************/
+void HalEcgMeasStop(void)
+{
+  T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
+  T1CTL |= HAL_TIMER1_OPMODE_STOP;
+}
+
+
+/***************************************************************************************************
+* @fn      halTimerSetCount
+*
+* @brief   Stop the Timer Service
+*
+* @param   hwtimerid - ID of the timer
+*          timerPerTick - Number micro sec per ticks 输入是微秒 10的-6
+*
+* @return  Status - OK or Not OK
+*          copy from timer.c on TI z-stack 2.3.0.
+***************************************************************************************************/
+uint8 halTimerSetCount(uint8 hwtimerid, uint32 timePerTick)
+{
+  uint16  count;
+  uint8   high, low;
+
+  /* Load count = ((sec/tick) x clock) / prescale */
+  count = (uint16)((timePerTick * halTimerRecord[hwtimerid].clock) / halTimerRecord[hwtimerid].prescaleVal);
+  high = (uint8)(count >> 8);
+  low = (uint8)count;
+
+  *(halTimerChannel[hwtimerid].TxCCH) = high;
+  *(halTimerChannel[hwtimerid].TxCCL) = low;
+
+  return HAL_TIMER_OK;
+}
+
+
+/***************************************************************************************************
+* @fn      halTimerSetPrescale
+*
+* @brief   Stop the Timer Service
+*
+* @param   hwtimerid - ID of the timer
+*          prescale - Prescale of the clock
+*
+* @return  Status - OK or Not OK
+*          copy from timer.c on TI z-stack 2.3.0.
+***************************************************************************************************/
+uint8 halTimerSetPrescale(uint8 hwtimerid, uint8 prescale)
+{
+	switch (hwtimerid)
+	{
+	case HW_TIMER_1:
+		T1CTL &= ~(HAL_TIMER1_16_TC_BITS);
+		T1CTL |= prescale;
+		break;
+//	case HW_TIMER_3:
+//		T3CTL &= ~(HAL_TIMER34_8_TC_BITS);
+//		T3CTL |= prescale;
+//		break;
+//	case HW_TIMER_4:
+//		T4CTL &= ~(HAL_TIMER34_8_TC_BITS);
+//		T4CTL |= prescale;
+		break;
+	default:
+		return HAL_TIMER_INVALID_ID;
+	}
+	return HAL_TIMER_OK;
+}
+
+
+/***************************************************************************************************
+* @fn      halTimerSetOpMode
+*
+* @brief   Setup operate modes
+*
+* @param   hwtimerid - ID of the timer
+*          opMode - operation mode of the timer
+*
+* @return  Status - OK or Not OK
+*          copy from timer.c on TI z-stack 2.3.0.
+***************************************************************************************************/
+uint8 halTimerSetOpMode(uint8 hwtimerid, uint8 opMode)
+{
+	/* Load Waveform Generation Mode */
+	switch (opMode)
+	{
+	case HAL_TIMER_MODE_NORMAL:
+		switch (hwtimerid)
+		{
+		case HW_TIMER_1:
+			T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
+			T1CTL |= HAL_TIMER1_OPMODE_FREERUN;
+			break;
+//		case HW_TIMER_3:
+//			T3CTL &= ~(HAL_TIMER34_OPMODE_BITS);
+//			T3CTL |= HAL_TIMER34_OPMODE_FREERUN;
+//			break;
+//		case HW_TIMER_4:
+//			T4CTL &= ~(HAL_TIMER34_OPMODE_BITS);
+//			T4CTL |= HAL_TIMER34_OPMODE_FREERUN;
+//			break;
+		default:
+			return HAL_TIMER_INVALID_ID;
+		}
+		break;
+
+	case HAL_TIMER_MODE_CTC:
+		switch (hwtimerid)
+		{
+		case HW_TIMER_1:
+			T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
+			T1CTL |= HAL_TIMER1_OPMODE_MODULO;
+			break;
+//		case HW_TIMER_3:
+//			T3CTL &= ~(HAL_TIMER34_OPMODE_BITS);
+//			T3CTL |= HAL_TIMER34_OPMODE_MODULO;
+//			break;
+//		case HW_TIMER_4:
+//			T4CTL &= ~(HAL_TIMER34_OPMODE_BITS);
+//			T4CTL |= HAL_TIMER34_OPMODE_MODULO;
+//			break;
+		default:
+			return HAL_TIMER_INVALID_ID;
+		}
+		break;
+
+//	case HAL_TIMER_MODE_STOP:
+//		if (hwtimerid == HW_TIMER_1)
+//		{
+//			T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
+//			T1CTL |= HAL_TIMER1_OPMODE_STOP;
+//		}
+//		break;
+        case HAL_TIMER1_OPMODE_UP_DOWN:
+                if ( hwtimerid == HW_TIMER_1 )
+                {
+			T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
+			T1CTL |= HAL_TIMER1_OPMODE_UP_DOWN;                  
+                }
+                break;
+	default:
+		return HAL_TIMER_INVALID_OP_MODE;
+	}
+	return HAL_TIMER_OK;
+}
+
+/***************************************************************************************************
+* @fn      HalTimerInterruptEnable
+*
+* @brief   Setup operate modes
+*
+* @param   hwtimerid - ID of the timer
+*          channelMode - channel mode
+*          enable - TRUE or FALSE
+*
+* @return  Status - OK or Not OK
+*          copy from timer.c on TI z-stack 2.3.0.
+***************************************************************************************************/
+uint8 HalTimerInterruptEnable(uint8 hwtimerid, uint8 channelMode, bool enable)
+{
+	switch (channelMode)
+	{
+	case HAL_TIMER_CH_MODE_OVERFLOW:
+
+		if (enable)
+		{
+			*(halTimerChannel[hwtimerid].TxOVF) |= halTimerChannel[hwtimerid].ovfbit;
+		}
+		else
+		{
+			*(halTimerChannel[hwtimerid].TxOVF) &= ((halTimerChannel[hwtimerid].ovfbit) ^ 0xFF);
+		}
+		break;
+
+	case HAL_TIMER_CH_MODE_OUTPUT_COMPARE:
+	case HAL_TIMER_CH_MODE_INPUT_CAPTURE:
+
+		if (enable)
+		{
+			//*(halTimerChannel[hwtimerid].TxCCTL) |= T134CCTL_IM;
+		}
+		else
+		{
+			//*(halTimerChannel[hwtimerid].TxCCTL) &= ~(T134CCTL_IM);
+		}
+		break;
+
+	default:
+		return HAL_TIMER_INVALID_CH_MODE;
+	}
+
+	if (halTimerRecord[hwtimerid].intEnable)
+	{
+		IEN1 |= halTimerChannel[hwtimerid].intbit;
+	}
+	else
+	{
+		IEN1 &= ((halTimerChannel[hwtimerid].intbit) ^ 0xFF);
+	}
+	return HAL_TIMER_OK;
+}
 
 
 /***************************************************************************************************
@@ -125,9 +433,8 @@ HAL_ISR_FUNCTION( halTimer1Isr, T1_VECTOR )
 
 #else
 void HalEcgMeasInit(void);
-void HalEcgMeasEnable(void);
-void HalEcgMeasDisable(void);
-void HalEcgMeasGetValue(void);
+void HalEcgMeasConfig( halTimerCBack_t cBack );
+void HalEcgMeasStart(uint32 timePerTick);
 
 
 
