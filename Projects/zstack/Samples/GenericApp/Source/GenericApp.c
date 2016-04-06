@@ -185,8 +185,8 @@ void GenericApp_Init( byte task_id )
   // Register for all key events - This app will handle all key events
   RegisterForKeys( GenericApp_TaskID );
 
-  // Register for ecg measure callback
-  HalEcgMeasConfig((void*)0);
+  // Register for ecg measure
+  HalEcgMeasConfig();
   
   // Update the display
 #if defined ( LCD_SUPPORTED )

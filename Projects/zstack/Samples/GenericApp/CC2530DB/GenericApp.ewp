@@ -3190,6 +3190,12 @@
     <file>
       <name>$PROJ_DIR$\..\Source\OSAL_GenericApp.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\PingPongBuf.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\PingPongBuf.h</name>
+    </file>
   </group>
   <group>
     <name>HAL</name>
