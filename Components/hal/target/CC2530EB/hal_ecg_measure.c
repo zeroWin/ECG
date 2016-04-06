@@ -1,9 +1,9 @@
 /**************************************************************************************************
-  Filename:       hal_battery_monitor.c
-  Revised:        $Date: 2016-03-12 19:37:16 +0800 (Sat, 12 Mar 2016) $
+  Filename:       hal_ecg_measure.c
+  Revised:        $Date: 2016-04-05 15:41:16 +0800 (Tues, 5 Apr 2016) $
   Revision:       $Revision: 1 $
 
-  Description:    This file contains the interface to the OLED Service.
+  Description:    This file contains the interface to the ECG measure.
 
 
   Copyright 2016 Bupt. All rights reserved.
@@ -43,8 +43,9 @@
  *                                             INCLUDES
  ***************************************************************************************************/
 #include "hal_ecg_measure.h"
-#include "hal_led.h"
 #include "hal_timer.h"
+
+
 
 #if (defined HAL_ECG_MEASURE) && (HAL_ECG_MEASURE == TRUE)
 /***************************************************************************************************
@@ -56,7 +57,7 @@
 #define IEN1_T1IE     0x02    /* Timer1 Interrupt Enable bit*/
 #define TIMIF_T1OVFIM 0x40    /* Timer1 overflow Enable bit*/
   
-#define T1STAT_OVFIF  0x10    /* Timer1 overflow interrupt flag */
+#define T1STAT_OVFIF  0x20    /* Timer1 overflow interrupt flag */
 
 
 /* Default all timers to use channel 0 */
@@ -66,7 +67,6 @@
 #define TCNH_T1OVF    &(X_TIMIF)
 #define TCHN_T1OVFBIT TIMIF_T1OVFIM
 #define TCHN_T1INTBIT IEN1_T1IE
-
 
 /***************************************************************************************************
  *                                              MACROS
@@ -99,14 +99,16 @@ typedef struct
 	uint8 intbit;
 } halTimerChannel_t;
 
-static halTimerSettings_t halTimerRecord[HW_TIMER_MAX];
-static halTimerChannel_t  halTimerChannel[HW_TIMER_MAX];
 /**************************************************************************************************
  *                                        INNER GLOBAL VARIABLES
  **************************************************************************************************/
+static halTimerSettings_t halTimerRecord[HW_TIMER_MAX];
+static halTimerChannel_t  halTimerChannel[HW_TIMER_MAX];
 
+PingPongBuf_t *pingPongBuf_ECG;
 
-
+/* Used to indentify the application ID for osal task */
+uint8 registeredEcgMeasTaskID;
 /**************************************************************************************************
  *                                        FUNCTIONS - Local
  **************************************************************************************************/
@@ -114,6 +116,7 @@ uint8 halTimerSetCount(uint8 hwtimerid, uint32 timePerTick);
 uint8 halTimerSetPrescale(uint8 hwtimerid, uint8 prescale);
 uint8 halTimerSetOpMode(uint8 hwtimerid, uint8 opMode);
 uint8 HalTimerInterruptEnable(uint8 hwtimerid, uint8 channelMode, bool enable);
+void halProcessTimer1Interrupt(void);
 
 /**************************************************************************************************
  *                                        FUNCTIONS - API
@@ -148,6 +151,13 @@ void HalEcgMeasInit(void)
   
   // AD8232 端口初始化
   
+  
+//  //Setting ADC reference volage 所有ADC参考电压由HalAdcInit()统一设置。
+//  // 这里保留代码但不使用
+//  HalAdcSetReference(ECG_MEASURE_RefVol);
+  
+  //数据存储空间初始化
+  pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET);
 }
 
 /***************************************************************************************************
@@ -159,7 +169,7 @@ void HalEcgMeasInit(void)
 *
 * @return 
 ***************************************************************************************************/
-void HalEcgMeasConfig( halEcgMeasCBack_t cBack )
+void HalEcgMeasConfig(halEcgMeasCBack_t cBack)
 {
   halTimerRecord[HW_TIMER_1].configured = TRUE;
   halTimerRecord[HW_TIMER_1].opMode = HAL_TIMER1_16_OPMODE;
@@ -407,6 +417,40 @@ uint8 HalTimerInterruptEnable(uint8 hwtimerid, uint8 channelMode, bool enable)
 
 
 /***************************************************************************************************
+* @fn      halProcessTimer1Interrupt()
+*
+* @brief   Processes Timer 1 Events.
+*
+* @param
+*
+* @return
+***************************************************************************************************/
+void halProcessTimer1Interrupt(void)
+{
+  if(T1STAT & T1STAT_OVFIF)
+  {
+    //中断标志自动清除
+    if(halTimerRecord[HW_TIMER_1].callBackFunc)
+      (halTimerRecord[HW_TIMER_1].callBackFunc)();
+  }
+}
+
+/***************************************************************************************************
+ * @fn      ECG_MeasRegisterTaskID
+ *
+ * @brief   This function registers the taskID of the application so it knows
+ *          where to send the messages whent they come in.
+ *
+ * @param   void
+ *
+ * @return  void
+ ***************************************************************************************************/
+void ECG_MeasRegisterTaskID( uint8 taskID )
+{
+  registeredEcgMeasTaskID = taskID;
+}
+
+/***************************************************************************************************
  *                                    INTERRUPT SERVICE ROUTINE
  ***************************************************************************************************/
 
@@ -423,9 +467,7 @@ HAL_ISR_FUNCTION( halTimer1Isr, T1_VECTOR )
 {
   HAL_ENTER_ISR();
   
-
-  HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
-  //halProcessTimer1Interrupt();
+  halProcessTimer1Interrupt();
   
   HAL_EXIT_ISR();
 }
@@ -435,7 +477,7 @@ HAL_ISR_FUNCTION( halTimer1Isr, T1_VECTOR )
 void HalEcgMeasInit(void);
 void HalEcgMeasConfig( halTimerCBack_t cBack );
 void HalEcgMeasStart(uint32 timePerTick);
+void HalEcgMeasStop(void);
+void ECG_MeasRegisterTaskID( uint8 taskID );
 
-
-
-#endif /* HAL_OLED */
+#endif /* HAL_ECG_MEASURE */

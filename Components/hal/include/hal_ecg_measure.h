@@ -1,9 +1,9 @@
 /**************************************************************************************************
   Filename:       hal_ecg_measure.h
-  Revised:        $Date: 2016-04-05 15:41:16 +0800 (Thu, 5 Apr 2016) $
+  Revised:        $Date: 2016-04-05 15:41:16 +0800 (Tues, 5 Apr 2016) $
   Revision:       $Revision: 1 $
 
-  Description:    This file contains the interface to the battery measurement.
+  Description:    This file contains the interface to the ECG measure.
 
 
   Copyright 2016 Bupt. All rights reserved.
@@ -49,8 +49,10 @@ extern "C"
  *                                             INCLUDES
  **************************************************************************************************/
 #include "hal_board.h"
+#include "pingPongBuf.h"
+#include "hal_adc.h"
 
-/**************************************************************************************************
+  /**************************************************************************************************
  * MACROS
  **************************************************************************************************/
 
@@ -88,10 +90,28 @@ extern "C"
  */
 #define HAL_TIMER1_16_OPMODE        HAL_TIMER1_OPMODE_UP_DOWN
   
+/* Set ADC channel and resolution
+*/
+#define ECG_MEASURE_CHANNEL      HAL_ADC_CHANNEL_0         //P0.0
+#define ECG_MEASURE_RESOLUTION   HAL_ADC_RESOLUTION_14     //14
+
+/* Set Reference Voltages*/
+#define ECG_MEASURE_RefVol       HAL_ADC_REF_AVDD    //SET VDD=3.3V as Vref
+  
+/* pingPong Buffer size---10*/
+#define ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET     10
 /***************************************************************************************************
  *                                             TYPEDEFS
  ***************************************************************************************************/
 typedef void (*halEcgMeasCBack_t) (void);
+
+/**************************************************************************************************
+ *                                        GLOBAL VARIABLES
+ **************************************************************************************************/
+extern PingPongBuf_t *pingPongBuf_ECG;
+
+/* Used to indentify the application ID for osal task */
+extern uint8 registeredEcgMeasTaskID;
 
 /**************************************************************************************************
  *                                             FUNCTIONS - API
@@ -105,7 +125,7 @@ extern void HalEcgMeasInit(void);
 /*
  * ECG measure config.
  */
-extern void HalEcgMeasConfig( halEcgMeasCBack_t cBack );
+extern void HalEcgMeasConfig(halEcgMeasCBack_t cBack);
 
 /*
  * Start ECG measure. 选择模模式-最大262140us-0.26s 选择up-down模式-最大524280us=0.52s
@@ -118,6 +138,11 @@ extern void HalEcgMeasStart(uint32 timePerTick);
  * Stop ECG measure.
  */
 extern void HalEcgMeasStop(void);
+
+/*
+ * Register TaskID for the ecg measure
+ */
+extern void ECG_MeasRegisterTaskID( uint8 taskID );
 
 #ifdef __cplusplus
 }
