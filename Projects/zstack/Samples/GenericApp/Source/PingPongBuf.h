@@ -110,6 +110,11 @@ extern BufOpStatus_t PingPongBufWrite(PingPongBuf_t *pingPongBuf,uint16 writeDat
 extern BufOpStatus_t PingPongBufRead(PingPongBuf_t *pingPongBuf,
                                      uint16 **dataBuf);
 
+/*
+ * Free PingPong buff memory.
+ */
+extern void PingPongBufFree(PingPongBuf_t *pingPongBuf);
+
 #ifdef __cplusplus
 }
 #endif  

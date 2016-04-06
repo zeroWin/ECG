@@ -103,9 +103,14 @@ PingPongBuf_t *PingPongBufInit(uint16 pingPongBufSize)
   
   if((pingPongBuf->pBuf_ping == NULL) || (pingPongBuf->pBuf_pong) == NULL)// don't have enough memory
   {
-    //free memory
-    osal_mem_free(pingPongBuf->pBuf_ping);
-    osal_mem_free(pingPongBuf->pBuf_pong);
+    // free memory 这里需要注意
+    // 由于osal_mem_free不做指针为空的判断
+    // 所以用户应该先进行判断之后，再调用该函数
+    if(pingPongBuf->pBuf_ping != NULL)
+      osal_mem_free(pingPongBuf->pBuf_ping);
+    if(pingPongBuf->pBuf_pong != NULL)
+      osal_mem_free(pingPongBuf->pBuf_pong);
+    
     osal_mem_free(pingPongBuf);
     pingPongBuf = NULL;
   }
@@ -128,6 +133,33 @@ void PingPongBufReset(PingPongBuf_t *pingPongBuf)
 {
   pingPongBuf->active_buf_flag = PING_BUFFER_ACTIVE;
   pingPongBuf->write_count = 0;  
+}
+
+
+/******************************************************************************
+ * @fn          PingPongFree
+ *
+ * @brief       to reset parameters of uint16 ping-pong buffer.
+ *
+ * @param       .
+ *
+ * @return      none
+ */
+void PingPongBufFree(PingPongBuf_t *pingPongBuf)
+{
+    // free memory 这里需要注意
+    // 由于osal_mem_free不做指针为空的判断
+    // 所以用户应该先进行判断之后，再调用该函数
+  if(pingPongBuf != NULL)
+  {
+    if(pingPongBuf->pBuf_ping != NULL)
+      osal_mem_free(pingPongBuf->pBuf_ping);
+    if(pingPongBuf->pBuf_pong != NULL)
+      osal_mem_free(pingPongBuf->pBuf_pong);
+    
+    osal_mem_free(pingPongBuf);
+    pingPongBuf = NULL;
+  }
 }
 
 
