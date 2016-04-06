@@ -75,6 +75,7 @@ extern "C"
 
 #define GENERICAPP_START_MEASURE      0x0002
 #define GENERICAPP_END_MEASURE        0x0004
+#define GENERICAPP_ECG_MEAS_BUFF_FULL 0x0008
 /*********************************************************************
  * MACROS
  */

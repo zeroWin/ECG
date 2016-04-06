@@ -64,6 +64,7 @@
 #include "hal_uart.h"
 #include "hal_oled.h"
 #include "hal_ecg_measure.h"
+#include "PingPongBuf.h"
 
 #include "string.h"
 /*********************************************************************
@@ -136,6 +137,7 @@ void GenericApp_HandleKeys( byte shift, byte keys );
 void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pckt );
 void GenericApp_SendTheMessage( void );
 
+void GenericApp_EcgMeasCB(void);
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
  */
@@ -185,8 +187,8 @@ void GenericApp_Init( byte task_id )
   // Register for all key events - This app will handle all key events
   RegisterForKeys( GenericApp_TaskID );
 
-  // Register for ecg measure
-  HalEcgMeasConfig();
+  // Register for ecg measure and event
+  HalEcgMeasConfig(GenericApp_EcgMeasCB);
   
   // Update the display
 #if defined ( LCD_SUPPORTED )
@@ -512,5 +514,29 @@ void GenericApp_SendTheMessage( void )
   }
 }
 
+
+void GenericApp_EcgMeasCB(void)
+{
+  uint16 ECGSample;
+  BufOpStatus_t OpStatus;
+  
+  //HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
+  //采集数据
+  ECGSample = HalAdcRead(ECG_MEASURE_CHANNEL,ECG_MEASURE_RESOLUTION);
+  ECGSample = (uint16)((ECGSample*3*2/0x3FFF)*100);
+  
+  //写入buff
+  OpStatus = PingPongBufWrite(pingPongBuf_ECG,ECGSample);
+  
+  //根据情况执行不同的事件
+  if (OpStatus == PingPongBuf_WRITE_SWITCH)
+  {
+    osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEAS_BUFF_FULL);
+  }
+  else if(OpStatus == PingPongBuf_WRITE_FAIL)
+  {
+    PingPongBufReset(pingPongBuf_ECG);
+  }
+}
 /*********************************************************************
 *********************************************************************/
