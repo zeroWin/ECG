@@ -107,8 +107,6 @@ static halTimerChannel_t  halTimerChannel[HW_TIMER_MAX];
 
 PingPongBuf_t *pingPongBuf_ECG;
 
-/* Used to indentify the application ID for osal task */
-uint8 registeredEcgMeasTaskID;
 /**************************************************************************************************
  *                                        FUNCTIONS - Local
  **************************************************************************************************/
@@ -436,21 +434,6 @@ void halProcessTimer1Interrupt(void)
 }
 
 /***************************************************************************************************
- * @fn      ECG_MeasRegisterTaskID
- *
- * @brief   This function registers the taskID of the application so it knows
- *          where to send the messages whent they come in.
- *
- * @param   void
- *
- * @return  void
- ***************************************************************************************************/
-void ECG_MeasRegisterTaskID( uint8 taskID )
-{
-  registeredEcgMeasTaskID = taskID;
-}
-
-/***************************************************************************************************
  *                                    INTERRUPT SERVICE ROUTINE
  ***************************************************************************************************/
 
@@ -478,6 +461,5 @@ void HalEcgMeasInit(void);
 void HalEcgMeasConfig( halTimerCBack_t cBack );
 void HalEcgMeasStart(uint32 timePerTick);
 void HalEcgMeasStop(void);
-void ECG_MeasRegisterTaskID( uint8 taskID );
 
 #endif /* HAL_ECG_MEASURE */

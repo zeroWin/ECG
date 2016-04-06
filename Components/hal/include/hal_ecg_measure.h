@@ -110,9 +110,6 @@ typedef void (*halEcgMeasCBack_t) (void);
  **************************************************************************************************/
 extern PingPongBuf_t *pingPongBuf_ECG;
 
-/* Used to indentify the application ID for osal task */
-extern uint8 registeredEcgMeasTaskID;
-
 /**************************************************************************************************
  *                                             FUNCTIONS - API
  **************************************************************************************************/
@@ -139,10 +136,6 @@ extern void HalEcgMeasStart(uint32 timePerTick);
  */
 extern void HalEcgMeasStop(void);
 
-/*
- * Register TaskID for the ecg measure
- */
-extern void ECG_MeasRegisterTaskID( uint8 taskID );
 
 #ifdef __cplusplus
 }
