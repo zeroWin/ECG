@@ -63,6 +63,7 @@
 #include "hal_key.h"
 #include "hal_uart.h"
 #include "hal_oled.h"
+#include "hal_ecg_measure.h"
 
 #include "string.h"
 /*********************************************************************
@@ -184,6 +185,9 @@ void GenericApp_Init( byte task_id )
   // Register for all key events - This app will handle all key events
   RegisterForKeys( GenericApp_TaskID );
 
+  // Register for ecg measure callback
+  HalEcgMeasConfig((void*)0);
+  
   // Update the display
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
@@ -410,29 +414,30 @@ void GenericApp_HandleKeys( byte shift, byte keys )
     HalOledShowNum(50,0,_NIB.nwkDevAddress,5,16);  
     HalOledShowNum(0,15,_NIB.nwkCoordAddress,1,16);  
     
-    NLME_LeaveReq_t leaveReq;
-
- osal_memset((uint8 *)&leaveReq,0,sizeof(NLME_LeaveReq_t));
-
- osal_memcpy(leaveReq.extAddr,NLME_GetExtAddr(),Z_EXTADDR_LEN);
-
- leaveReq.removeChildren = FALSE; // Only false shoule be use.
-
- leaveReq.rejoin = TRUE;   //
-
- leaveReq.silent = TRUE;
-
- NLME_LeaveReq( &leaveReq );
+//    NLME_LeaveReq_t leaveReq;
+//
+// osal_memset((uint8 *)&leaveReq,0,sizeof(NLME_LeaveReq_t));
+//
+// osal_memcpy(leaveReq.extAddr,NLME_GetExtAddr(),Z_EXTADDR_LEN);
+//
+// leaveReq.removeChildren = FALSE; // Only false shoule be use.
+//
+// leaveReq.rejoin = TRUE;   //
+//
+// leaveReq.silent = TRUE;
+//
+// NLME_LeaveReq( &leaveReq );
     
-    
+    HalEcgMeasStart(500000);
   }
   if(keys & HAL_KEY_SW_7)
   {
     HalLedSet(HAL_LED_2,HAL_LED_MODE_TOGGLE);
     HalOledShowChar(0,0,'b',12,1);
-    //改成别的方法。
-    //ZDApp_StartJoiningCycle();
-    ZDOInitDevice(0);
+
+//    //启动网络功能
+//    ZDOInitDevice(0);
+    HalEcgMeasStop();
   }
   HalOledRefreshGram();
     
