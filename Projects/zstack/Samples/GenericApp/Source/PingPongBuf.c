@@ -201,5 +201,5 @@ BufOpStatus_t PingPongBufRead(PingPongBuf_t *pingPongBuf,
   else
     *dataBuf = pingPongBuf->pBuf_ping;
   
-  return PingPongBuf_READ_SUCCESS;
+  return OpStatus;
 }
