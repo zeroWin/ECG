@@ -102,7 +102,9 @@
  **************************************************************************************************/
 void HalBattMonInit(void)
 {
-  HalAdcSetReference(BATTER_MONITOR_RefVol);
+//  //Setting ADC reference volage 所有ADC参考电压由HalAdcInit()统一设置。
+//  // 这里保留代码但不使用
+//  HalAdcSetReference(BATTER_MONITOR_RefVol);
 }
 
 
@@ -124,7 +126,7 @@ float HalGetBattVol(void)
   tempVol = HalAdcRead( BATTER_MONITOR_CHANNEL, BATTER_MONITOR_RESOLUTION ); 
   //max value = 0x3fff/2, battery voltage = input voltage x 2
   //ref volage=3.3V
-  tempVol = tempVol*3.3*2*2/0x3ffff;    
+  tempVol = tempVol*3.3*2*2/0x3fff;    
   
   BATTER_MINITOR_DISABLE;   // Disable BATT_MON_EN, P0.1 low
   
@@ -219,4 +221,4 @@ void HalBattMonInit(void);
 float HalGetBattVol(void);
 uint8 HalShowBattVol(uint8 fThreshold);
 
-#endif /* HAL_OLED */
+#endif /* HAL_BATTERY_MONITOR */
