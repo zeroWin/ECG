@@ -459,6 +459,11 @@ st( \
 #define HAL_ECG_MEASURE TRUE
 #endif
 
+/* Set to TRUE enable RTC DS1302 usage, FALSE disable it */
+#ifndef HAL_RTC_DS1302
+#define HAL_RTC_DS1302 TRUE
+#endif
+
 /* Set to TRUE enable LED usage, FALSE disable it */
 #ifndef HAL_LED
 #define HAL_LED TRUE
