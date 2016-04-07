@@ -219,7 +219,7 @@ BufOpStatus_t PingPongBufWrite(PingPongBuf_t *pingPongBuf,uint16 writeData)
  *
  * @param       *pingPongBuf - point to the buffer which to read
  *              *dataBuf     - point to the buffer which store the read data
- * @return      none
+ * @return      Buf status
  */
 BufOpStatus_t PingPongBufRead(PingPongBuf_t *pingPongBuf,
                                      uint16 **dataBuf)
