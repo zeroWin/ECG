@@ -519,5 +519,8 @@ void HalEcgMeasInit(void);
 void HalEcgMeasConfig( halTimerCBack_t cBack );
 void HalEcgMeasStart(uint32 timePerTick);
 void HalEcgMeasStop(void);
+uint16 HalEcgMeasSampleVal(void);
+BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus);
+void HalEcgMeasBuffReset(void);
 
 #endif /* HAL_ECG_MEASURE */
