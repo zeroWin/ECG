@@ -64,7 +64,6 @@
 #include "hal_uart.h"
 #include "hal_oled.h"
 #include "hal_ecg_measure.h"
-#include "PingPongBuf.h"
 
 #include "string.h"
 /*********************************************************************
@@ -522,20 +521,22 @@ void GenericApp_EcgMeasCB(void)
   
   //HalLedSet(HAL_LED_1,HAL_LED_MODE_TOGGLE);
   //采集数据
-  ECGSample = HalAdcRead(ECG_MEASURE_CHANNEL,ECG_MEASURE_RESOLUTION);
-  ECGSample = (uint16)((ECGSample*3*2/0x3FFF)*100);
-  
+  ECGSample = HalEcgMeasSampleVal();
   //写入buff
-  OpStatus = PingPongBufWrite(pingPongBuf_ECG,ECGSample);
+  OpStatus = HalEcgMeasWriteToBuf(ECGSample,1);
   
   //根据情况执行不同的事件
-  if (OpStatus == PingPongBuf_WRITE_SWITCH)
+  if (OpStatus == PingPongBuf_WRITE_SWITCH) // Success and switch buff
   {
     osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEAS_BUFF_FULL);
   }
-  else if(OpStatus == PingPongBuf_WRITE_FAIL)
+  else if(OpStatus == PingPongBuf_WRITE_FAIL )// fail
   {
-    PingPongBufReset(pingPongBuf_ECG);
+    HalEcgMeasBuffReset();
+  }
+  else  //Success
+  { 
+    //do nothing
   }
 }
 /*********************************************************************

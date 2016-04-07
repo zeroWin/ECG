@@ -108,7 +108,7 @@ typedef void (*halEcgMeasCBack_t) (void);
 /**************************************************************************************************
  *                                        GLOBAL VARIABLES
  **************************************************************************************************/
-extern PingPongBuf_t *pingPongBuf_ECG;
+
 
 /**************************************************************************************************
  *                                             FUNCTIONS - API
@@ -135,6 +135,23 @@ extern void HalEcgMeasStart(uint32 timePerTick);
  * Stop ECG measure.
  */
 extern void HalEcgMeasStop(void);
+
+/*
+ * Get ECG measure value
+ */
+extern uint16 HalEcgMeasSampleVal(void);
+
+
+/*
+ * Write ECG value into PingPong buff
+ */
+extern BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus);
+
+
+/*
+ * Reset ECG ping-pong buffer
+ */
+extern void HalEcgMeasBuffReset(void);
 
 
 #ifdef __cplusplus

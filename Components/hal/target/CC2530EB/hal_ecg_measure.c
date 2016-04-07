@@ -147,16 +147,67 @@ void HalEcgMeasInit(void)
   halTimerChannel[HW_TIMER_1].intbit = TCHN_T1INTBIT; /* IEN1-bit2:TCHN_T1INTBIT = 0x02 */
   
   
-  // AD8232 端口初始化
+  /* AD8232 端口初始化 LOD-和LOD+暂时不使用，无论采集到什么都发送或者写入SD卡 */
   
-  
-//  //Setting ADC reference volage 所有ADC参考电压由HalAdcInit()统一设置。
-//  // 这里保留代码但不使用
-//  HalAdcSetReference(ECG_MEASURE_RefVol);
-  
-  //数据存储空间初始化
-  pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET);
+  /*
+  //Setting ADC reference volage 所有ADC参考电压由HalAdcInit()统一设置。
+  // 这里保留代码但不使用
+  HalAdcSetReference(ECG_MEASURE_RefVol);
+  */
 }
+
+
+/**************************************************************************************************
+ * @fn      HalEcgMeasSampleVal
+ *
+ * @brief   Get ECG measure value.Get AD sample value and calculate
+ *
+ * @param   none
+ *
+ * @return  Sample value
+ **************************************************************************************************/
+uint16 HalEcgMeasSampleVal(void)
+{
+  uint16 ECGSample;
+  ECGSample = HalAdcRead(ECG_MEASURE_CHANNEL,ECG_MEASURE_RESOLUTION);
+  ECGSample = (uint16)((ECGSample*3*2/0x3FFF)*100);
+  return ECGSample;
+}
+
+
+/**************************************************************************************************
+ * @fn      HalEcgMeasWriteToBuf
+ *
+ * @brief   Get ECG measure value.Get AD sample value and calculate
+ *
+ * @param   writeData and deviceStatus--inNetwork or outNetwork
+ *
+ * @return  Buf status
+ **************************************************************************************************/
+BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus)
+{
+  BufOpStatus_t OpStatus;
+  
+  OpStatus = PingPongBufWrite(pingPongBuf_ECG,writeData);
+  
+  return OpStatus;
+}
+
+
+/***************************************************************************************************
+* @fn      HalEcgMeasBuffReset
+*
+* @brief   Reset ECG ping-pong buffer
+*
+* @param   void
+*
+* @return  void
+***************************************************************************************************/
+void HalEcgMeasBuffReset(void)
+{
+  PingPongBufReset(pingPongBuf_ECG);
+}
+
 
 /***************************************************************************************************
 * @fn      HalEcgMeasConfig
@@ -197,6 +248,10 @@ void HalEcgMeasStart(uint32 timePerTick)
     halTimerSetPrescale(HW_TIMER_1,halTimerRecord[HW_TIMER_1].prescale);
     halTimerSetOpMode(HW_TIMER_1,halTimerRecord[HW_TIMER_1].opMode);
     
+    //开辟ping-pong buffer
+    pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET); //for send
+    
+    
     // enable interruput
     HalTimerInterruptEnable(HW_TIMER_1, HAL_TIMER_CH_MODE_OVERFLOW, halTimerRecord[HW_TIMER_1].intEnable );
   }
@@ -216,6 +271,9 @@ void HalEcgMeasStop(void)
 {
   T1CTL &= ~(HAL_TIMER1_OPMODE_BITS);
   T1CTL |= HAL_TIMER1_OPMODE_STOP;
+  
+  // Free ping-pong buffer
+  PingPongBufFree(pingPongBuf_ECG);
 }
 
 
