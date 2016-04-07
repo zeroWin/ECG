@@ -106,7 +106,6 @@ void I2C_O(unsigned char mcmd);
 void I2C_Ack(void);
 void writec(unsigned char x);
 void writed(unsigned char d);
-void halMcuWaitUs(uint16 microSecs);
 uint32 oled_pow(uint8 m,uint8 n);
 
 void HalOledDrawPoint(uint8 x,uint8 y,uint8 t);

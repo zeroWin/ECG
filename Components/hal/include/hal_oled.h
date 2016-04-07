@@ -98,6 +98,11 @@ extern void HalOledRefreshGram(void);
  */
 extern void HalOledOnOff(uint8 mode);
   
+/*
+ * Del function.
+ */
+extern void halMcuWaitUs(uint16 microSecs); 
+
 #ifdef __cplusplus
 }
 #endif  
