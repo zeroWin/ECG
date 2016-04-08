@@ -180,7 +180,7 @@ uint16 HalEcgMeasSampleVal(void)
  *
  * @brief   Get ECG measure value.Get AD sample value and calculate
  *
- * @param   writeData and deviceStatus--inNetwork or outNetwork
+ * @param   writeData and deviceStatus--online or offline
  *
  * @return  Buf status
  **************************************************************************************************/
