@@ -186,6 +186,11 @@ void HalDriverInit (void)
   HalEcgMeasInit();
 #endif  
   
+  /* RTC DS1302 */
+#if (defined HAL_RTC_DS1302) && (HAL_RTC_DS1302 == TRUE)
+  HalRTCInit();
+#endif
+
   /* SPI */
 #if (defined HAL_SPI) && (HAL_SPI == TRUE)
   HalSpiInit();
