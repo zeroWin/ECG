@@ -158,7 +158,6 @@ void PingPongBufFree(PingPongBuf_t *pingPongBuf)
       osal_mem_free(pingPongBuf->pBuf_pong);
     
     osal_mem_free(pingPongBuf);
-    pingPongBuf = NULL;
   }
 }
 
@@ -205,6 +204,7 @@ BufOpStatus_t PingPongBufWrite(PingPongBuf_t *pingPongBuf,uint16 writeData)
        else
          active_buff_flag_temp = PING_BUFFER_ACTIVE;
        
+       pingPongBuf->active_buf_flag = active_buff_flag_temp;
        OpStatus = PingPongBuf_WRITE_SWITCH;
      }
    }
