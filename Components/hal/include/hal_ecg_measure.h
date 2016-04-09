@@ -98,8 +98,16 @@ extern "C"
 /* Set Reference Voltages*/
 #define ECG_MEASURE_RefVol       HAL_ADC_REF_AVDD    //SET VDD=3.3V as Vref
   
-/* pingPong Buffer size---10*/
+/* pingPong Buffer */
+/* for Send to Network size --- 10 uint16 = 20 byte */
+/* for Send to SD      size --- 256 uint16 = 512 byte */
 #define ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET     10
+#define ECG_WAVEFORM_SAMPLER_NUM_FOR_SD         256  
+  
+/* pingPong Buffer Choose */
+#define ECG_BUFFER_FOR_ZIGBEE   0x00
+#define ECG_BUFFER_FOR_SD       0x01
+  
 /***************************************************************************************************
  *                                             TYPEDEFS
  ***************************************************************************************************/
@@ -126,9 +134,10 @@ extern void HalEcgMeasConfig(halEcgMeasCBack_t cBack);
 
 /*
  * Start ECG measure. 选择模模式-最大262140us-0.26s 选择up-down模式-最大524280us=0.52s
- * 输入为微秒数
+ * timePerTick -- 采样频率，输入为微秒数
+ * deviceStatus -- 在线测量还是离线测量，根据情况不同，开辟不同大小的buffer
  */
-extern void HalEcgMeasStart(uint32 timePerTick);
+extern void HalEcgMeasStart(uint32 timePerTick,uint8 deviceStatus);
 
 
 /*
@@ -145,14 +154,17 @@ extern uint16 HalEcgMeasSampleVal(void);
 /*
  * Write ECG value into PingPong buff
  */
-extern BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus);
+extern BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData);
 
+/*
+ * Read ECG value from PingPong buff
+ */
+extern void HalEcgMeasReadFromBuf(uint16 **dataBuf);
 
 /*
  * Reset ECG ping-pong buffer
  */
 extern void HalEcgMeasBuffReset(void);
-
 
 #ifdef __cplusplus
 }

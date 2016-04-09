@@ -178,19 +178,36 @@ uint16 HalEcgMeasSampleVal(void)
 /**************************************************************************************************
  * @fn      HalEcgMeasWriteToBuf
  *
- * @brief   Get ECG measure value.Get AD sample value and calculate
+ * @brief   Write AD sample data to buffer
  *
- * @param   writeData and deviceStatus--online or offline
+ * @param   writeData
+ *          deviceStatus -- online or offline
  *
  * @return  Buf status
  **************************************************************************************************/
-BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus)
+BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData)
 {
   BufOpStatus_t OpStatus;
   
   OpStatus = PingPongBufWrite(pingPongBuf_ECG,writeData);
-  
+    
   return OpStatus;
+}
+
+
+/**************************************************************************************************
+ * @fn      HalEcgMeasReadFromBuf
+ *
+ * @brief   Read AD sample data from buffer
+ *
+ * @param   dataBuf -- store the data
+ *          deviceStatus -- online or offline
+ *
+ * @return  void
+ **************************************************************************************************/
+void HalEcgMeasReadFromBuf(uint16 **dataBuf)
+{
+  PingPongBufRead(pingPongBuf_ECG,dataBuf);
 }
 
 
@@ -233,10 +250,11 @@ void HalEcgMeasConfig(halEcgMeasCBack_t cBack)
 * @brief   Start the Ecg Meas Service
 *
 * @param   timerPerTick - number of micro sec per tick, (ticks x prescale) / clock = usec/tick
+* 
 *
 * @return  
 ***************************************************************************************************/
-void HalEcgMeasStart(uint32 timePerTick)
+void HalEcgMeasStart(uint32 timePerTick,uint8 deviceStatus)
 {
   if( halTimerRecord[HW_TIMER_1].configured )
   {
@@ -249,8 +267,10 @@ void HalEcgMeasStart(uint32 timePerTick)
     halTimerSetOpMode(HW_TIMER_1,halTimerRecord[HW_TIMER_1].opMode);
     
     //开辟ping-pong buffer
-    pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET); //for send
-    
+    if ( deviceStatus == ECG_BUFFER_FOR_ZIGBEE )
+      pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET); //for send
+    else if ( deviceStatus == ECG_BUFFER_FOR_SD )
+      pingPongBuf_ECG = PingPongBufInit(ECG_WAVEFORM_SAMPLER_NUM_FOR_SD);     //for write to SD
     
     // enable interruput
     HalTimerInterruptEnable(HW_TIMER_1, HAL_TIMER_CH_MODE_OVERFLOW, halTimerRecord[HW_TIMER_1].intEnable );
@@ -274,6 +294,7 @@ void HalEcgMeasStop(void)
   
   // Free ping-pong buffer
   PingPongBufFree(pingPongBuf_ECG);
+  pingPongBuf_ECG = NULL;
 }
 
 
@@ -485,7 +506,7 @@ void halProcessTimer1Interrupt(void)
 {
   if(T1STAT & T1STAT_OVFIF)
   {
-    //中断标志自动清除
+    //中断标志自动清除，执行回调函数
     if(halTimerRecord[HW_TIMER_1].callBackFunc)
       (halTimerRecord[HW_TIMER_1].callBackFunc)();
   }
@@ -517,10 +538,13 @@ HAL_ISR_FUNCTION( halTimer1Isr, T1_VECTOR )
 #else
 void HalEcgMeasInit(void);
 void HalEcgMeasConfig( halTimerCBack_t cBack );
-void HalEcgMeasStart(uint32 timePerTick);
+extern void HalEcgMeasStart(uint32 timePerTick,uint8 deviceStatus);
 void HalEcgMeasStop(void);
 uint16 HalEcgMeasSampleVal(void);
-BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData,uint8 deviceStatus);
+
+BufOpStatus_t HalEcgMeasWriteToBuf(uint16 writeData);
+void HalEcgMeasReadFromBuf(uint16 **dataBuf);
+
 void HalEcgMeasBuffReset(void);
 
 #endif /* HAL_ECG_MEASURE */
