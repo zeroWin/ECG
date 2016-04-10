@@ -74,7 +74,7 @@ extern "C"
 #define GENERICAPP_SEND_MSG_EVT       0x0001
 
 #define GENERICAPP_START_MEASURE      0x0002
-#define GENERICAPP_END_MEASURE        0x0004
+#define GENERICAPP_STOP_MEASURE       0x0004
 #define GENERICAPP_ECG_MEAS_BUFF_FULL 0x0008
 #define GENERICAPP_ECG_NETWORK_TEST   0x0010
 /*********************************************************************
@@ -89,7 +89,7 @@ typedef enum
   ECG_ONLINE_IDLE,
   ECG_ONLINE_MEASURE,
   ECG_OFFLINE_IDLE,
-  ECG_OFFLING_MEASURE,
+  ECG_OFFLINE_MEASURE,
   ECG_FIND_NETWORK
 } EcgSystemStatus_t;
 
