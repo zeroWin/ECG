@@ -141,7 +141,7 @@ void GenericApp_SendTheMessage( void );
 
 void GenericApp_EcgMeasCB(void);
 void GenericApp_LeaveNetwork( void );
-void GenericApp_HandleNetworkStatus( void );
+void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp);
 void GenericApp_HandleBufferFull( void );
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
@@ -271,15 +271,8 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
 
         case ZDO_STATE_CHANGE:
           GenericApp_NwkState = (devStates_t)(MSGpkt->hdr.status);
-          if ( (GenericApp_NwkState == DEV_ZB_COORD)
-              || (GenericApp_NwkState == DEV_ROUTER)
-              || (GenericApp_NwkState == DEV_END_DEVICE) )
-          {
-            // Start sending "the" message in a regular interval.
-//            osal_start_timerEx( GenericApp_TaskID,
-//                                GENERICAPP_SEND_MSG_EVT,
-//                                GENERICAPP_SEND_MSG_TIMEOUT );
-          }
+          GenericApp_HandleNetworkStatus(GenericApp_NwkState);
+          
           break;
 
         default:
@@ -322,14 +315,14 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       EcgSystemStatus = ECG_OFFLINE_MEASURE;
       HalOledShowString(0,0,32,"OFF-MEAS");
       
-      HalEcgMeasStart( 8000 , ECG_BUFFER_FOR_SD );
+      HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_SD );
     }
     else if ( EcgSystemStatus == ECG_ONLINE_IDLE ) // 在线状态
     {
       EcgSystemStatus = ECG_ONLINE_MEASURE;
       HalOledShowString(0,0,32,"ON-MEAS");
       
-      HalEcgMeasStart( 8000 , ECG_BUFFER_FOR_ZIGBEE );
+      HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_ZIGBEE );
     }
     HalOledRefreshGram();
     
@@ -372,15 +365,6 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     return (events ^ GENERICAPP_STOP_MEASURE);
   }
   
-  
-  // Test netwrok status
-  if ( events & GENERICAPP_ECG_NETWORK_TEST )
-  {
-    GenericApp_HandleNetworkStatus();
-    
-    // return unprocessed events
-    return events ^ GENERICAPP_ECG_NETWORK_TEST;
-  }
   
   // Discard unknown events
   return 0;
@@ -464,13 +448,10 @@ void GenericApp_HandleKeys( byte shift, byte keys )
         if( ZDOInitDevice(0) == ZDO_INITDEV_LEAVE_NOT_STARTED) //Start Network
           ZDOInitDevice(0);
       EcgSystemStatus = ECG_FIND_NETWORK;
-      //Open Network test event
-      osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_NETWORK_TEST);
+      
     }
     else if( EcgSystemStatus == ECG_ONLINE_IDLE) // 在线-->离线
     {
-      //Close Network test event
-      osal_stop_timerEx( GenericApp_TaskID , GENERICAPP_ECG_NETWORK_TEST );
       // Leave Network
       GenericApp_LeaveNetwork(); 
       EcgSystemStatus = ECG_OFFLINE_IDLE;
@@ -481,9 +462,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
     }
     else if ( EcgSystemStatus == ECG_FIND_NETWORK ) // 寻找网络-->离线
     {
-      //Close Network test event
-      osal_stop_timerEx( GenericApp_TaskID , GENERICAPP_ECG_NETWORK_TEST );     
-      
       // Stop search network
       ZDApp_StopJoiningCycle();
       EcgSystemStatus = ECG_OFFLINE_IDLE;
@@ -538,7 +516,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
-      HalOledShowString(20,15,16,"V0.32");
+      HalOledShowString(20,15,16,"V0.5");
       HalOledRefreshGram();
       if( strcmp((char*)pkt->cmd.Data,"Start") == 0 )
       {
@@ -561,9 +539,9 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
  *
  * @return  none
  */
-void GenericApp_HandleNetworkStatus( void )
+void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
 {
-  if( devState == DEV_END_DEVICE) //connect to GW
+  if( GenericApp_NwkStateTemp == DEV_END_DEVICE) //connect to GW
   {
     if( EcgSystemStatus == ECG_FIND_NETWORK )
     {
@@ -582,10 +560,6 @@ void GenericApp_HandleNetworkStatus( void )
     
   HalOledRefreshGram();
   
-  // 5s later again
-  osal_start_timerEx( GenericApp_TaskID,
-                      GENERICAPP_ECG_NETWORK_TEST,
-                      5000 );
 }
 
 
