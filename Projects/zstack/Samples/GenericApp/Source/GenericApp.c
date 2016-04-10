@@ -271,6 +271,7 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
 
         case ZDO_STATE_CHANGE:
           GenericApp_NwkState = (devStates_t)(MSGpkt->hdr.status);
+          
           GenericApp_HandleNetworkStatus(GenericApp_NwkState);
           
           break;
@@ -516,7 +517,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       WPRINTSTR( pkt->cmd.Data );
 #endif
       HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
-      HalOledShowString(20,15,16,"V0.5");
+      HalOledShowString(20,15,16,"V0.52");
       HalOledRefreshGram();
       if( strcmp((char*)pkt->cmd.Data,"Start") == 0 )
       {
@@ -543,14 +544,11 @@ void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
 {
   if( GenericApp_NwkStateTemp == DEV_END_DEVICE) //connect to GW
   {
-    if( EcgSystemStatus == ECG_FIND_NETWORK )
-    {
       EcgSystemStatus = ECG_ONLINE_IDLE;
       HalOledShowString(0,0,32,"ON-IDLE");
-    }
   }
-  else  // Find network -- 1.coordinate lose 2.first connect to coordinate
-  {
+  else if( EcgSystemStatus != ECG_OFFLINE_IDLE) // Find network -- 1.coordinate lose 2.first connect to coordinate 
+  { // 关闭搜索后，可能由于OSAL的timer事件设置，再进入一次ZDO_STATE_CHANGE，上面的判断就是为了排除这种情况
     if ( EcgSystemStatus == ECG_ONLINE_MEASURE ) // Online measure status
       HalEcgMeasStop();        // stop measure
     
