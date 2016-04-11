@@ -1,9 +1,9 @@
 /**************************************************************************************************
-  Filename:       hal_rtc_ds1302.c
+  Filename:       hal_rtc_ds1302.h
   Revised:        $Date: 2016-04-07 15:20:16 +0800 (Tues, 7 Apr 2016) $
   Revision:       $Revision: 1 $
 
-  Description:    This file contains the interface to the OLED Service.
+  Description:    This file contains the interface to the RTC Service.
 
 
   Copyright 2016 Bupt. All rights reserved.
