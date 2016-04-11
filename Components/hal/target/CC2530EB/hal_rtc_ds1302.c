@@ -679,5 +679,8 @@ void halMcuWaitUs(uint16 microSecs)
 
 #else
 
+void HalRTCInit(void);
+void HalRTCGetOrSet(uint8 getOrSetFlag,uint8 registerName,uint8 *value);
+void HalRTCGetOrSetFull(uint8 getOrSetFlag, RTCStruct_t *RTCStruct);
 
 #endif /* HAL_RTC_DS1302 */
