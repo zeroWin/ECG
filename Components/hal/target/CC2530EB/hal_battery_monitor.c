@@ -67,8 +67,8 @@
 /***************************************************************************************************
  *                                              MACROS
  ***************************************************************************************************/
-#define BATTER_MINITOR_ENABLE       HAL_CONFIG_IO_OUTPUT(BATTER_MONITOR_EN_PORT,BATTER_MONIROT_EN_PIN,TRUE)
-#define BATTER_MINITOR_DISABLE      HAL_CONFIG_IO_OUTPUT(BATTER_MONITOR_EN_PORT,BATTER_MONIROT_EN_PIN,FALSE)
+#define BATTER_MINITOR_ENABLE       MCU_IO_OUTPUT(BATTER_MONITOR_EN_PORT,BATTER_MONIROT_EN_PIN,TRUE)
+#define BATTER_MINITOR_DISABLE      MCU_IO_OUTPUT(BATTER_MONITOR_EN_PORT,BATTER_MONIROT_EN_PIN,FALSE)
 
 
 /***************************************************************************************************
@@ -144,71 +144,71 @@ float HalGetBattVol(void)
             1 warring--Battery volage 20%
             2 warring--Battery gone   0%-10%
  **************************************************************************************************/
-uint8 halShowBattVol(uint8 fThreshold)
+uint8 HalShowBattVol(uint8 fThreshold)
 {
   static float fThreshold_temp;
   float fBattV;
   
   if(fThreshold == 1)//测量
   {
-     fBattV = halGetBattVol();
+     fBattV = HalGetBattVol();
      fThreshold_temp = fBattV;
   }
   
   if(fThreshold_temp >= 4.000)
   {
-    OLED_ShowString(72,0,12,"100%");
+    HalOledShowString(72,0,12,"100%");
     //OLED_ShowPowerSymbol(100,0,1,10);  //100%
   }
   else if(fThreshold_temp >= 3.900)
   {
-    OLED_ShowString(72,0,12," 90%");
+    HalOledShowString(72,0,12," 90%");
     //OLED_ShowPowerSymbol(100,0,1,9);  //90%
   }
   else if(fThreshold_temp >= 3.800)
   {
-    OLED_ShowString(72,0,12," 80%");
+    HalOledShowString(72,0,12," 80%");
     //OLED_ShowPowerSymbol(100,0,1,8);   //80%
   }
   else if(fThreshold_temp >= 3.700)
   {
-    OLED_ShowString(72,0,12," 70%");
+    HalOledShowString(72,0,12," 70%");
     //OLED_ShowPowerSymbol(100,0,1,7);   //70%
   }
   else if(fThreshold_temp >= 3.600)
   {
-    OLED_ShowString(72,0,12," 60%");
+    HalOledShowString(72,0,12," 60%");
     //OLED_ShowPowerSymbol(100,0,1,6);   //60%
   }
   else if(fThreshold_temp >= 3.500)
   {
-    OLED_ShowString(72,0,12," 50%");
+    HalOledShowString(72,0,12," 50%");
     //OLED_ShowPowerSymbol(100,0,1,5);   //50%
   }
   else if(fThreshold_temp >= 3.400)
   {
-    OLED_ShowString(72,0,12," 40%");
+    HalOledShowString(72,0,12," 40%");
     //OLED_ShowPowerSymbol(100,0,1,4);   //40%
   }
   else if(fThreshold_temp >= 3.300)
   {
-    OLED_ShowString(72,0,12," 30%");
+    HalOledShowString(72,0,12," 30%");
     //OLED_ShowPowerSymbol(100,0,1,3);   //30%
   }
   else if(fThreshold_temp >= 3.200)
   {
-    OLED_ShowString(72,0,12," 20%");
+    HalOledShowString(72,0,12," 20%");
     //OLED_ShowPowerSymbol(100,0,1,2);   //20%
   }
   else if(fThreshold_temp >= 3.100)
   {
-    OLED_ShowString(72,0,12," 10%");
+    HalOledShowString(72,0,12," 10%");
     //OLED_ShowPowerSymbol(100,0,1,1);  //10%---警告电量，屏幕只显示LowPower
     return 1;
   }
   else
   {
-    OLED_ShowString(72,0,12,"  0%");
+    HalOledShowString(72,0,12,"  0%");
     //OLED_ShowPowerSymbol(100,0,1,0);  //0%---屏幕黑屏
     return 2;
   }
