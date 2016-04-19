@@ -105,6 +105,8 @@ void HalBattMonInit(void)
 //  //Setting ADC reference volage 所有ADC参考电压由HalAdcInit()统一设置。
 //  // 这里保留代码但不使用
 //  HalAdcSetReference(BATTER_MONITOR_RefVol);
+  
+  BATTER_MINITOR_DISABLE;
 }
 
 
