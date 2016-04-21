@@ -1,6 +1,6 @@
 #include "exfuns.h"
 #include "string.h"
-#include "malloc.h"
+#include "OSAL.h"
 //////////////////////////////////////////////////////////////////////////////////
 
 //待填说明
@@ -8,7 +8,7 @@
 //////////////////////////////////////////////////////////////////////////////////	
 
  //文件类型列表
-const uint8_t *FILE_TYPE_TBL[6][13]=
+const uint8 *FILE_TYPE_TBL[6][13]=
 {
 {"BIN"},			//BIN文件
 {"LRC"},			//LRC文件
@@ -25,24 +25,24 @@ UINT br,bw;			//读写变量
 FILINFO fileinfo;	//文件信息
 DIR dir;  			//目录
 
-//uint8_t *fatbuf;			//SD卡数据缓存区
+//uint8 *fatbuf;			//SD卡数据缓存区
 ///////////////////////////////////////////////////////////////////////////////////////
 //为exfuns申请内存
 //返回值:0,成功
 //1,失败
-uint8_t exfuns_init(void)
+uint8 exfuns_init(void)
 {
-	fs=(FATFS*)mymalloc(SRAMIN,sizeof(FATFS));	//为磁盘0工作区申请内存	
-	file=(FIL*)mymalloc(SRAMIN,sizeof(FIL));	//为file申请内存
-	ftemp=(FIL*)mymalloc(SRAMIN,sizeof(FIL));	//为ftemp申请内存
-	//fatbuf=(uint8_t*)mymalloc(SRAMIN,512);		//为fatbuf申请内存 512个字节
+	fs=(FATFS*)osal_mem_alloc(sizeof(FATFS));	//为磁盘0工作区申请内存	
+	file=(FIL*)osal_mem_alloc(sizeof(FIL));	//为file申请内存
+	ftemp=(FIL*)osal_mem_alloc(sizeof(FIL));	//为ftemp申请内存
+	//fatbuf=(uint8*)mymalloc(SRAMIN,512);		//为fatbuf申请内存 512个字节
 	//if(fs&&file&&ftemp&&fatbuf)return 0;  //申请有一个失败,即失败.
 	if(fs&&file&&ftemp)return 0;  //申请有一个失败,即失败.
 	else return 1;	
 }
 
 //将小写字母转为大写字母,如果是数字,则保持不变.
-uint8_t char_upper(uint8_t c)
+uint8 char_upper(uint8 c)
 {
 	if(c<'A')return c;//数字,保持不变.
 	if(c>='a')return c-0x20;//变为大写.
@@ -52,11 +52,11 @@ uint8_t char_upper(uint8_t c)
 //fname:文件名
 //返回值:0XFF,表示无法识别的文件类型编号.
 //		 其他,高四位表示所属大类,低四位表示所属小类.
-uint8_t f_typetell(uint8_t *fname)
+uint8 f_typetell(uint8 *fname)
 {
-	uint8_t tbuf[5];
-	uint8_t *attr='\0';//后缀名
-	uint8_t i=0,j;
+	uint8 tbuf[5];
+	uint8 *attr='\0';//后缀名
+	uint8 i=0,j;
 	while(i<250)
 	{
 		i++;
@@ -95,10 +95,10 @@ uint8_t f_typetell(uint8_t *fname)
 //total:总容量	 （单位KB）
 //free:剩余容量	 （单位KB）
 //返回值:0,正常.其他,错误代码
-uint8_t exf_getfree(uint8_t *drv,uint32_t *total,uint32_t *free)
+uint8 exf_getfree(uint8 *drv,uint32 *total,uint32 *free)
 {
 	FATFS *fs1;
-	uint8_t res;
+	uint8 res;
     DWORD fre_clust=0, fre_sect=0, tot_sect=0;
     //得到磁盘信息及空闲簇数量
     res = f_getfree((const TCHAR*)drv, &fre_clust, &fs1);

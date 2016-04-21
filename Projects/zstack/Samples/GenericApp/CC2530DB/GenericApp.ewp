@@ -2585,6 +2585,8 @@
           <state>$PROJ_DIR$\..\..\..\..\..\Components\stack\zdo</state>
           <state>$PROJ_DIR$\..\..\..\..\..\Components\zmac</state>
           <state>$PROJ_DIR$\..\..\..\..\..\Components\zmac\f8w</state>
+          <state>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\exfuns</state>
+          <state>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -3182,6 +3184,36 @@
   </configuration>
   <group>
     <name>App</name>
+    <group>
+      <name>Fatfs</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\option\ccsbcs.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\diskio.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\diskio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\exfuns\exfuns.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\exfuns\exfuns.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\ff.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\ff.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\ffconf.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\..\..\Components\FATFS\src\integer.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\Source\GenericApp.c</name>
     </file>

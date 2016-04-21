@@ -1,7 +1,6 @@
-#include "SDcard.h"
+#include "hal_SDcard.h"
 #include "diskio.h"
-#include "stm32l1xx_conf.h"
-#include "malloc.h"
+#include "OSAL.h"
 //////////////////////////////////////////////////////////////////////////////////
 
 //V1.0此文件由用户提供，是文件系统所调用的底层驱动部分，应按照FATFS的说明文档，在这些函数
@@ -19,7 +18,7 @@ DSTATUS disk_initialize (
 	BYTE drv				/* Physical drive nmuber (0..) */
 )
 {	
-	uint8_t res=0;	    
+	uint8 res=0;	    
 	switch(drv)
 	{
 		case SD_CARD://SD卡
@@ -58,7 +57,7 @@ DRESULT disk_read (
 	BYTE count		/* Number of sectors to read (1..255) */
 )
 {
-	uint8_t res=0; 
+	uint8 res=0; 
     if (!count)return RES_PARERR;//count不能等于0，否则返回参数错误		 	 
 	switch(drv)
 	{
@@ -92,12 +91,12 @@ DRESULT disk_write (
 	BYTE count			/* Number of sectors to write (1..255) */
 )
 {
-	uint8_t res=0;  
+	uint8 res=0;  
     if (!count)return RES_PARERR;//count不能等于0，否则返回参数错误		 	 
 	switch(drv)
 	{
 		case SD_CARD://SD卡
-			res=SD_WriteDisk((uint8_t*)buff,sector,count);
+			res=SD_WriteDisk((uint8*)buff,sector,count);
 			break;
 		default:
 			res=1; 
@@ -160,12 +159,12 @@ DWORD get_fattime (void)
 //动态分配内存
 void *ff_memalloc (UINT size)			
 {
-	return (void*)mymalloc(SRAMIN,size);
+	return (void*)osal_mem_alloc(size);
 }
 //释放内存
 void ff_memfree (void* mf)		 
 {
-	myfree(SRAMIN,mf);
+	osal_mem_free(mf);
 }
 
 

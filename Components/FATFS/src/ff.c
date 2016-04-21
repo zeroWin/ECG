@@ -518,7 +518,28 @@ static WCHAR LfnBuf[_MAX_LFN+1];
    Module Private Functions
 
 ---------------------------------------------------------------------------*/
+DWORD clust2sect (	/* !=0: Sector number, 0: Failed - invalid cluster# */
+	FATFS *fs,		/* File system object */
+	DWORD clst		/* Cluster# to be converted */
+);
 
+DWORD get_fat (	/* 0xFFFFFFFF:Disk error, 1:Internal error, Else:Cluster status */
+	FATFS *fs,	/* File system object */
+	DWORD clst	/* Cluster# to get the link information */
+);
+
+FRESULT put_fat (
+	FATFS *fs,	/* File system object */
+	DWORD clst,	/* Cluster# to be changed in range of 2 to fs->n_fatent - 1 */
+	DWORD val	/* New value to mark the cluster */
+);
+
+void gen_numname (
+	BYTE *dst,			/* Pointer to generated SFN */
+	const BYTE *src,	/* Pointer to source SFN to be modified */
+	const WCHAR *lfn,	/* Pointer to LFN */
+	WORD seq			/* Sequence number */
+);
 
 /*-----------------------------------------------------------------------*/
 /* String functions                                                      */

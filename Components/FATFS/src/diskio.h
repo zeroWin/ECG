@@ -35,7 +35,9 @@ DRESULT disk_write (BYTE, const BYTE*, DWORD, BYTE);
 #endif
 DRESULT disk_ioctl (BYTE, BYTE, void*);
 
-
+DWORD get_fattime (void);
+void *ff_memalloc (UINT size);	
+void ff_memfree (void* mf);
 
 /* Disk Status Bits (DSTATUS) */
 
