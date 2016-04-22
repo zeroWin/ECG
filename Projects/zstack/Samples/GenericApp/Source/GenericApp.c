@@ -65,6 +65,9 @@
 #include "hal_oled.h"
 #include "hal_ecg_measure.h"
 #include "hal_rtc_ds1302.h"
+#include "hal_SDcard.h"
+#include "exfuns.h"
+#include "ff.h"
 
 #include "string.h"
 /*********************************************************************
@@ -198,6 +201,11 @@ void GenericApp_Init( byte task_id )
   // Init ECG status
   EcgSystemStatus = ECG_OFFLINE_IDLE;
   
+  // Init SD card and fatfs
+  while(SD_Initialize());
+  exfuns_init();      // 申请文件系统内存
+  f_mount(0,fs);      // 挂载文件系统  
+  
   // Update the display
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
@@ -316,6 +324,10 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       EcgSystemStatus = ECG_OFFLINE_MEASURE;
       HalOledShowString(0,0,32,"OFF-MEAS");
       
+      // 打开文件，并移位到最后,防止覆盖之前的数据
+      f_open(file,"0:SampleData.txt",FA_OPEN_ALWAYS | FA_WRITE);
+      f_lseek(file,file->fsize);
+
       HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_SD );
     }
     else if ( EcgSystemStatus == ECG_ONLINE_IDLE ) // 在线状态
@@ -351,6 +363,9 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     // Change status
     if( EcgSystemStatus == ECG_OFFLINE_MEASURE ) // 离线测量
     {
+      // 关闭文件
+      f_close(file);
+      
       EcgSystemStatus = ECG_OFFLINE_IDLE;
       HalOledShowString(0,0,32,"OFF-IDLE");
       
@@ -441,6 +456,7 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
+  uint32 a,b = 0;
   if(keys & HAL_KEY_SW_6)   //Link button be pressed
   {
     if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // 离线-->寻找网络
@@ -589,7 +605,7 @@ void GenericApp_HandleBufferFull( void )
   {
     // Get data and write to SD card
     HalEcgMeasReadFromBuf( &dataTemp );
-    uint16 a = dataTemp[0];
+    f_write(file,dataTemp,512,&bw);
   }
   
   
@@ -634,7 +650,7 @@ void GenericApp_SendTheMessage( void )
  *
  * @return  none
  */
-uint16 a = 0;
+uint16 a = 65;
 void GenericApp_EcgMeasCB(void)
 {
   uint16 ECGSample;
@@ -644,8 +660,8 @@ void GenericApp_EcgMeasCB(void)
   //ECGSample = HalEcgMeasSampleVal();
   ECGSample = a;
   a++;
-  if( a == 500 )
-    a = 0;
+  if( a == 91 )
+    a = 65;
   
   //Write to buffer
   OpStatus = HalEcgMeasWriteToBuf(ECGSample);

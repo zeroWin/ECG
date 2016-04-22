@@ -70,7 +70,7 @@ extern "C"
 #define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
 
 // Sample ECG Timeout
-#define GENERICAPP_SAMPLE_ECG_TIMEOUT 10000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
+#define GENERICAPP_SAMPLE_ECG_TIMEOUT 5000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
   
 // Application Events (OSAL) - These are bit weighted definitions.
   // 除了Ox8000-SYS_EVENT_MSG均可用，一共可以注册15个用户事件
