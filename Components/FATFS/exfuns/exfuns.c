@@ -19,9 +19,8 @@ const uint8 *FILE_TYPE_TBL[6][13]=
 };
 ///////////////////////////////公共文件区,使用malloc的时候////////////////////////////////////////////
 FATFS *fs;  		//逻辑磁盘工作区.	 
-FIL *file;	  		//文件1
-FIL *ftemp;	  		//文件2.
-UINT br,bw;			//读写变量
+FIL *file;	        //文件1
+UINT br,bw;	        //读写变量
 FILINFO fileinfo;	//文件信息
 DIR dir;  			//目录
 
@@ -34,10 +33,9 @@ uint8 exfuns_init(void)
 {
 	fs=(FATFS*)osal_mem_alloc(sizeof(FATFS));	//为磁盘0工作区申请内存	
 	file=(FIL*)osal_mem_alloc(sizeof(FIL));	//为file申请内存
-	ftemp=(FIL*)osal_mem_alloc(sizeof(FIL));	//为ftemp申请内存
 	//fatbuf=(uint8*)mymalloc(SRAMIN,512);		//为fatbuf申请内存 512个字节
 	//if(fs&&file&&ftemp&&fatbuf)return 0;  //申请有一个失败,即失败.
-	if(fs&&file&&ftemp)return 0;  //申请有一个失败,即失败.
+	if(fs&&file)return 0;  //申请有一个失败,即失败.
 	else return 1;	
 }
 

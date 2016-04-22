@@ -8,8 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////	
 extern FATFS *fs;  
-extern FIL *file;	 
-extern FIL *ftemp;	 
+extern FIL *file;	  
 extern UINT br,bw;
 extern FILINFO fileinfo;
 extern DIR dir;
