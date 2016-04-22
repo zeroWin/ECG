@@ -55,8 +55,8 @@
 #define	SD_GPIO_CS_PORT							1
 #define SD_CS_GPIO_PIN							2		//P1.2:CS
 
-#define SD_CS_H MCU_IO_OUTPUT(SD_GPIO_CS_PORT, SD_CS_GPIO_PIN,1)	//CS = 1 
-#define SD_CS_L MCU_IO_OUTPUT(SD_GPIO_CS_PORT,SD_CS_GPIO_PIN,0)     // CS = 0
+#define SD_CS_H MCU_IO_OUTPUT(SD_GPIO_CS_PORT, SD_CS_GPIO_PIN,1)	// CS = 1 
+#define SD_CS_L MCU_IO_OUTPUT(SD_GPIO_CS_PORT,SD_CS_GPIO_PIN,0)         // CS = 0
 
 //--------------------------- 相关定值宏定义 -------------------------- 
 #define DUMMY_DATA 0xFF			//不被SD卡识别的命令值，用于产生时钟信号

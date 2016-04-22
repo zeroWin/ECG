@@ -81,6 +81,7 @@
 #define UTXxIF                     UTX0IF
 
 #define HAL_UART_PERCFG_BIT        0x01         // USART0 on P0, Alt-2; so set this bit.
+#define UxGCR_BAUD_E_BIT           0x1F         // UxGCR BAUD_E[4:0]
 
 /* SPI SCLK,MO,MI is at P1.3,P1.4,P1.5 */
 #define HAL_SPI_SCLK_MO_MI             0x38
@@ -92,6 +93,7 @@
 /* SPI baud rate 4M */
 #define HAL_SPI_UxBAUD_NUM_HIGH            0 
 #define HAL_SPI_UxGCR_NUM_HIGH             17
+
 /***************************************************************************************************
  *                                              TYPEDEFS
  ***************************************************************************************************/
@@ -184,11 +186,12 @@ uint8 SPI1_ReadWriteByte(uint8 TxData)
  **************************************************************************************************/
 void SPI1_SetSpeed_Low(void)
 {
-  /* When SPI config is complete, Disable SPI. */
+  /* When SPI config is setting, Disable SPI. */
   UxCSR &= ~CSR_RE; 
   
   /* Setup the baud. */
-  UxGCR = HAL_SPI_UxGCR_NUM_LOW; 
+  UxGCR &= ~UxGCR_BAUD_E_BIT;
+  UxGCR |= HAL_SPI_UxGCR_NUM_LOW; 
   UxBAUD = HAL_SPI_UxBAUD_NUM_LOW; 
   
   /* When SPI config is complete, enable it. */
@@ -211,7 +214,8 @@ void SPI1_SetSpeed_High(void)
   UxCSR &= ~CSR_RE; 
   
   /* Setup the baud. */
-  UxGCR = HAL_SPI_UxGCR_NUM_HIGH; 
+  UxGCR &= ~UxGCR_BAUD_E_BIT;
+  UxGCR |= HAL_SPI_UxGCR_NUM_HIGH; 
   UxBAUD = HAL_SPI_UxBAUD_NUM_HIGH; 
   
   /* When SPI config is complete, enable it. */

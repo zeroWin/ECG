@@ -65,6 +65,7 @@
 #include "hal_oled.h"
 #include "hal_ecg_measure.h"
 #include "hal_rtc_ds1302.h"
+#include "hal_SDcard.h"
 
 #include "string.h"
 /*********************************************************************
@@ -441,48 +442,51 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
+  uint32 a = 0;
   if(keys & HAL_KEY_SW_6)   //Link button be pressed
   {
-    if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // ¿Îœﬂ-->—∞’“Õ¯¬Á
-    {
-      if( ZDApp_StartJoiningCycle() == FALSE )
-        if( ZDOInitDevice(0) == ZDO_INITDEV_LEAVE_NOT_STARTED) //Start Network
-          ZDOInitDevice(0);
-      EcgSystemStatus = ECG_FIND_NETWORK;
-      
-    }
-    else if( EcgSystemStatus == ECG_ONLINE_IDLE) // ‘⁄œﬂ-->¿Îœﬂ
-    {
-      // Leave Network
-      GenericApp_LeaveNetwork(); 
-      EcgSystemStatus = ECG_OFFLINE_IDLE;
-     
-      HalOledShowString(0,0,32,"CLOSE");
-      HalOledRefreshGram();
-      
-    }
-    else if ( EcgSystemStatus == ECG_FIND_NETWORK ) // —∞’“Õ¯¬Á-->¿Îœﬂ
-    {
-      // Stop search network
-      ZDApp_StopJoiningCycle();
-      EcgSystemStatus = ECG_OFFLINE_IDLE;
-      
-      HalOledShowString(0,0,32,"OFF-IDLE");
-      HalOledRefreshGram();
-    }
-    else // Online or Offline measure
-    {}//do nothing
+    while(SD_Initialize());
+    a = SD_GetSectorCount();
+//    if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // ¿Îœﬂ-->—∞’“Õ¯¬Á
+//    {
+//      if( ZDApp_StartJoiningCycle() == FALSE )
+//        if( ZDOInitDevice(0) == ZDO_INITDEV_LEAVE_NOT_STARTED) //Start Network
+//          ZDOInitDevice(0);
+//      EcgSystemStatus = ECG_FIND_NETWORK;
+//      
+//    }
+//    else if( EcgSystemStatus == ECG_ONLINE_IDLE) // ‘⁄œﬂ-->¿Îœﬂ
+//    {
+//      // Leave Network
+//      GenericApp_LeaveNetwork(); 
+//      EcgSystemStatus = ECG_OFFLINE_IDLE;
+//     
+//      HalOledShowString(0,0,32,"CLOSE");
+//      HalOledRefreshGram();
+//      
+//    }
+//    else if ( EcgSystemStatus == ECG_FIND_NETWORK ) // —∞’“Õ¯¬Á-->¿Îœﬂ
+//    {
+//      // Stop search network
+//      ZDApp_StopJoiningCycle();
+//      EcgSystemStatus = ECG_OFFLINE_IDLE;
+//      
+//      HalOledShowString(0,0,32,"OFF-IDLE");
+//      HalOledRefreshGram();
+//    }
+//    else // Online or Offline measure
+//    {}//do nothing
   }
   
   /* Work button be pressed */
   if(keys & HAL_KEY_SW_7)   
   {
-    if( EcgSystemStatus == ECG_OFFLINE_IDLE || EcgSystemStatus == ECG_ONLINE_IDLE ) // ø’œ–◊¥Ã¨ ∆Ù∂Ø≤‚¡ø
-      osal_set_event(GenericApp_TaskID,GENERICAPP_START_MEASURE);
-    else if( EcgSystemStatus == ECG_OFFLINE_MEASURE || EcgSystemStatus == ECG_ONLINE_MEASURE ) // ≤‚¡ø◊¥Ã¨ πÿ±’≤‚¡ø
-      osal_set_event(GenericApp_TaskID,GENERICAPP_STOP_MEASURE);
-    else
-    {} // find network status do nothing
+//    if( EcgSystemStatus == ECG_OFFLINE_IDLE || EcgSystemStatus == ECG_ONLINE_IDLE ) // ø’œ–◊¥Ã¨ ∆Ù∂Ø≤‚¡ø
+//      osal_set_event(GenericApp_TaskID,GENERICAPP_START_MEASURE);
+//    else if( EcgSystemStatus == ECG_OFFLINE_MEASURE || EcgSystemStatus == ECG_ONLINE_MEASURE ) // ≤‚¡ø◊¥Ã¨ πÿ±’≤‚¡ø
+//      osal_set_event(GenericApp_TaskID,GENERICAPP_STOP_MEASURE);
+//    else
+//    {} // find network status do nothing
 
   }
 
