@@ -63,10 +63,14 @@ extern "C"
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
-#define GENERICAPP_MAX_CLUSTERS       1
-#define GENERICAPP_CLUSTERID          1
+#define GENERICAPP_IN_CLUSTERS        3
+#define GENERICAPP_OUT_CLUSTERS       1  
 
-// Send Message Timeout
+#define GENERICAPP_CLUSTERID          1
+#define GENERICAPP_CLUSTERID_START    2
+#define GENERICAPP_CLUSTERID_STOP     3
+
+  // Send Message Timeout
 #define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
 
 // Sample ECG Timeout

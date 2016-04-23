@@ -87,22 +87,29 @@
  */
 
 // This list should be filled with Application specific Cluster IDs.
-const cId_t GenericApp_ClusterList[GENERICAPP_MAX_CLUSTERS] =
+const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
+{
+  GENERICAPP_CLUSTERID,
+  GENERICAPP_CLUSTERID_START,
+  GENERICAPP_CLUSTERID_STOP
+};
+
+const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID
 };
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
 {
-  GENERICAPP_ENDPOINT,          //  int Endpoint;
-  GENERICAPP_PROFID,                //  uint16 AppProfId[2];
-  GENERICAPP_DEVICEID,              //  uint16 AppDeviceId[2];
-  GENERICAPP_DEVICE_VERSION,        //  int   AppDevVer:4;
-  GENERICAPP_FLAGS,                 //  int   AppFlags:4;
-  GENERICAPP_MAX_CLUSTERS,          //  byte  AppNumInClusters;
-  (cId_t *)GenericApp_ClusterList,  //  byte *pAppInClusterList;
-  GENERICAPP_MAX_CLUSTERS,          //  byte  AppNumInClusters;
-  (cId_t *)GenericApp_ClusterList   //  byte *pAppInClusterList;
+  GENERICAPP_ENDPOINT,                  //  int Endpoint;
+  GENERICAPP_PROFID,                    //  uint16 AppProfId[2];
+  GENERICAPP_DEVICEID,                  //  uint16 AppDeviceId[2];
+  GENERICAPP_DEVICE_VERSION,            //  int   AppDevVer:4;
+  GENERICAPP_FLAGS,                     //  int   AppFlags:4;
+  GENERICAPP_IN_CLUSTERS,               //  byte  AppNumInClusters;
+  (cId_t *)GenericApp_InClusterList,    //  byte *pAppInClusterList;
+  GENERICAPP_OUT_CLUSTERS,              //  byte  AppNumOutClusters;
+  (cId_t *)GenericApp_OutClusterList    //  byte *pAppOutClusterList;
 };
 
 // This is the Endpoint/Interface description.  It is defined here, but
@@ -456,7 +463,6 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
-  uint32 a,b = 0;
   if(keys & HAL_KEY_SW_6)   //Link button be pressed
   {
     if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // ÀëÏß-->Ñ°ÕÒÍøÂç
@@ -532,17 +538,20 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
 #elif defined( WIN32 )
       WPRINTSTR( pkt->cmd.Data );
 #endif
-      HalOledShowString(20,0,16,(uint8 *)pkt->cmd.Data);
-      HalOledShowString(20,15,16,"V0.53");
+      break;
+      
+    case GENERICAPP_CLUSTERID_START:
+      HalOledShowString(20,0,16,"start");
+      HalOledShowString(20,15,16,"V0.54");
       HalOledRefreshGram();
-      if( strcmp((char*)pkt->cmd.Data,"Start") == 0 )
-      {
-        osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
-      }
-      else if( strcmp((char*)pkt->cmd.Data,"End") == 0)
-      {
-        osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
-      }
+      osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
+      break;
+      
+    case GENERICAPP_CLUSTERID_STOP:  
+      HalOledShowString(20,0,16,"stop");
+      HalOledShowString(20,15,16,"V0.54");
+      HalOledRefreshGram();      
+      osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
       break;
   }
 }
