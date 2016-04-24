@@ -78,7 +78,7 @@ extern "C"
   
 // Application Events (OSAL) - These are bit weighted definitions.
   // 除了Ox8000-SYS_EVENT_MSG均可用，一共可以注册15个用户事件
-#define GENERICAPP_SEND_MSG_EVT       0x0001
+//#define GENERICAPP_SEND_MSG_EVT       0x0001
 
 #define GENERICAPP_START_MEASURE      0x0002
 #define GENERICAPP_STOP_MEASURE       0x0004
