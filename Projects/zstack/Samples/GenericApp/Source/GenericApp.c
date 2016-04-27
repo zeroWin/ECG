@@ -99,7 +99,8 @@ const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
-  GENERICAPP_CLUSTERID_SYNC_OVER
+  GENERICAPP_CLUSTERID_SYNC_OVER,
+  GENERICAPP_CLUSTERID_ECG_RESULT
 };
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
@@ -632,7 +633,7 @@ void GenericApp_HandleBufferFull( void )
     // Get data and send data
     HalEcgMeasReadFromBuf( &dataTemp );
     AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                   GENERICAPP_CLUSTERID,
+                   GENERICAPP_CLUSTERID_ECG_RESULT,
                    ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET*2,
                    (uint8 *)dataTemp,
                    &GenericApp_TransID,
@@ -799,7 +800,7 @@ void GenericApp_SyncData(void)
     {
       EcgSystemStatus = ECG_ONLINE_IDLE; // 同步结束
       AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                       GENERICAPP_CLUSTERID,
+                       GENERICAPP_CLUSTERID_SYNC_OVER,
                        0,
                        NULL,
                        &GenericApp_TransID,
@@ -827,7 +828,7 @@ void GenericApp_SyncData(void)
     {
       // 发送数据
       AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                       GENERICAPP_CLUSTERID,
+                       GENERICAPP_CLUSTERID_ECG_RESULT,
                        ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET*2,
                        dataSendBufferTemp,
                        &GenericApp_TransID,

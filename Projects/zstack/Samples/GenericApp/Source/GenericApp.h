@@ -64,13 +64,16 @@ extern "C"
 #define GENERICAPP_FLAGS              0
 
 #define GENERICAPP_IN_CLUSTERS        4
-#define GENERICAPP_OUT_CLUSTERS       2  
+#define GENERICAPP_OUT_CLUSTERS       3  
 
-#define GENERICAPP_CLUSTERID               1
-#define GENERICAPP_CLUSTERID_START         2
-#define GENERICAPP_CLUSTERID_STOP          3
-#define GENERICAPP_CLUSTERID_SYNC          4
-#define GENERICAPP_CLUSTERID_SYNC_OVER     5
+#define GENERICAPP_CLUSTERID               1   // I/O
+#define GENERICAPP_CLUSTERID_START         2   // I
+#define GENERICAPP_CLUSTERID_STOP          3   // I
+#define GENERICAPP_CLUSTERID_SYNC          4   // I
+#define GENERICAPP_CLUSTERID_SYNC_OVER     5   // O
+//#define GENERICAPP_CLUSTERID_TEMPR_RESULT  6   // O
+#define GENERICAPP_CLUSTERID_ECG_RESULT    7   // O
+  
   
 // Send SYNC Message Timeout
 #define GENERICAPP_SEND_SYNC_FILE_TIMEOUT   1000     // 文件与文件之间同步间隔为1s
