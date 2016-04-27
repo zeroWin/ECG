@@ -63,18 +63,21 @@ extern "C"
 #define GENERICAPP_DEVICE_VERSION     0
 #define GENERICAPP_FLAGS              0
 
-#define GENERICAPP_IN_CLUSTERS        3
-#define GENERICAPP_OUT_CLUSTERS       1  
+#define GENERICAPP_IN_CLUSTERS        4
+#define GENERICAPP_OUT_CLUSTERS       2  
 
-#define GENERICAPP_CLUSTERID          1
-#define GENERICAPP_CLUSTERID_START    2
-#define GENERICAPP_CLUSTERID_STOP     3
-
-  // Send Message Timeout
-#define GENERICAPP_SEND_MSG_TIMEOUT   5000     // Every 5 seconds
-
+#define GENERICAPP_CLUSTERID               1
+#define GENERICAPP_CLUSTERID_START         2
+#define GENERICAPP_CLUSTERID_STOP          3
+#define GENERICAPP_CLUSTERID_SYNC          4
+#define GENERICAPP_CLUSTERID_SYNC_OVER     5
+  
+// Send SYNC Message Timeout
+#define GENERICAPP_SEND_SYNC_FILE_TIMEOUT   1000     // 文件与文件之间同步间隔为1s
+#define GENERICAPP_SEND_SYNC_PACKET_TIMEOUT 80       // 包与包之间同步间隔为80ms
+  
 // Sample ECG Timeout
-#define GENERICAPP_SAMPLE_ECG_TIMEOUT 5000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
+#define GENERICAPP_SAMPLE_ECG_TIMEOUT 8000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
   
 // Application Events (OSAL) - These are bit weighted definitions.
   // 除了Ox8000-SYS_EVENT_MSG均可用，一共可以注册15个用户事件
@@ -83,6 +86,7 @@ extern "C"
 #define GENERICAPP_START_MEASURE      0x0002
 #define GENERICAPP_STOP_MEASURE       0x0004
 #define GENERICAPP_ECG_MEAS_BUFF_FULL 0x0008
+#define GENERICAPP_ECG_SYNC           0x0010
 /*********************************************************************
  * MACROS
  */
@@ -96,9 +100,18 @@ typedef enum
   ECG_ONLINE_MEASURE,
   ECG_OFFLINE_IDLE,
   ECG_OFFLINE_MEASURE,
-  ECG_FIND_NETWORK
+  ECG_FIND_NETWORK,
+  ECG_SYNC_DATA,
+  ECG_CLOSING
 } EcgSystemStatus_t;
 
+typedef enum
+{
+  SYNC_READ_DIR,
+  SYNC_READ_DATA,
+  SYNC_SEND_DATA,
+  SYNC_CLOSE_FILE,
+} SyncStatus_t;
 /*********************************************************************
  * FUNCTIONS
  */

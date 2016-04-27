@@ -78,6 +78,7 @@
  * CONSTANTS
  */
 
+
 /*********************************************************************
  * TYPEDEFS
  */
@@ -91,12 +92,14 @@ const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
   GENERICAPP_CLUSTERID_START,
-  GENERICAPP_CLUSTERID_STOP
+  GENERICAPP_CLUSTERID_STOP,
+  GENERICAPP_CLUSTERID_SYNC
 };
 
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
 {
-  GENERICAPP_CLUSTERID
+  GENERICAPP_CLUSTERID,
+  GENERICAPP_CLUSTERID_SYNC_OVER
 };
 
 const SimpleDescriptionFormat_t GenericApp_SimpleDesc =
@@ -120,6 +123,8 @@ endPointDesc_t GenericApp_epDesc;
 
 // This is for GenericApp state machine。
 EcgSystemStatus_t EcgSystemStatus;
+
+SyncStatus_t SyncStatus;
 /*********************************************************************
  * EXTERNAL VARIABLES
  */
@@ -141,6 +146,10 @@ byte GenericApp_TransID;  // This is the unique message ID (counter)
 
 afAddrType_t GenericApp_DstAddr;
 
+char fileName[30]; // store file name
+char pathname[30]; // read file name
+uint8 *dataSendBuffer;
+uint8 *dataSendBufferTemp;
 /*********************************************************************
  * LOCAL FUNCTIONS
  */
@@ -152,6 +161,9 @@ void GenericApp_EcgMeasCB(void);
 void GenericApp_LeaveNetwork( void );
 void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp);
 void GenericApp_HandleBufferFull( void );
+void GenericApp_GetWriteName( char *fileName );
+void GenericApp_SyncData(void);
+bool GenericApp_OpenDir(void);
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
  */
@@ -206,12 +218,13 @@ void GenericApp_Init( byte task_id )
   
   // Init ECG status
   EcgSystemStatus = ECG_OFFLINE_IDLE;
-  
+  SyncStatus = SYNC_READ_DIR;
+    
   // Init SD card and fatfs
   while(SD_Initialize());
   exfuns_init();      // 申请文件系统内存
   f_mount(0,fs);      // 挂载文件系统  
-  
+  f_mkdir("0:D");     // 创建文件夹
   // Update the display
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
@@ -314,9 +327,9 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       EcgSystemStatus = ECG_OFFLINE_MEASURE;
       HalOledShowString(0,0,32,"OFF-MEAS");
       
-      // 打开文件，并移位到最后,防止覆盖之前的数据
-      f_open(file,"0:SampleData.txt",FA_OPEN_ALWAYS | FA_WRITE);
-      f_lseek(file,file->fsize);
+      // 打开文件并创建文件 保证不会有两次测量的数据混在一个文件中
+      GenericApp_GetWriteName(fileName);
+      f_open(file,fileName,FA_CREATE_ALWAYS | FA_WRITE);
 
       HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_SD );
     }
@@ -371,6 +384,21 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     return (events ^ GENERICAPP_STOP_MEASURE);
   }
   
+  // SYNC data
+  if ( events & GENERICAPP_ECG_SYNC )
+  {
+    if(EcgSystemStatus == ECG_SYNC_DATA)
+      GenericApp_SyncData();
+    else if(SyncStatus != SYNC_READ_DIR) // 断网了关闭文件释放空间
+    {
+      // 关闭文件释放buffer
+      f_close(file);
+      osal_mem_free(dataSendBuffer);
+    }
+    
+    // return unprocessed events
+    return (events ^ GENERICAPP_ECG_SYNC);
+  }  
   
   // Discard unknown events
   return 0;
@@ -454,13 +482,12 @@ void GenericApp_HandleKeys( byte shift, byte keys )
         if( ZDOInitDevice(0) == ZDO_INITDEV_LEAVE_NOT_STARTED) //Start Network
           ZDOInitDevice(0);
       EcgSystemStatus = ECG_FIND_NETWORK;
-      
     }
     else if( EcgSystemStatus == ECG_ONLINE_IDLE) // 在线-->离线
     {
       // Leave Network
       GenericApp_LeaveNetwork(); 
-      EcgSystemStatus = ECG_OFFLINE_IDLE;
+      EcgSystemStatus = ECG_CLOSING;
      
       HalOledShowString(0,0,32,"CLOSE");
       HalOledRefreshGram();
@@ -475,7 +502,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       HalOledShowString(0,0,32,"OFF-IDLE");
       HalOledRefreshGram();
     }
-    else // Online or Offline measure
+    else // Online , Offline measure , closing , SYNC
     {}//do nothing
   }
   
@@ -487,7 +514,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
     else if( EcgSystemStatus == ECG_OFFLINE_MEASURE || EcgSystemStatus == ECG_ONLINE_MEASURE ) // 测量状态 关闭测量
       osal_set_event(GenericApp_TaskID,GENERICAPP_STOP_MEASURE);
     else
-    {} // find network status do nothing
+    {} // find network , closing , SYNC 
 
   }
 
@@ -524,17 +551,35 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       break;
       
     case GENERICAPP_CLUSTERID_START:
-      HalOledShowString(20,0,16,"start");
-      HalOledShowString(20,15,16,"V0.54");
-      HalOledRefreshGram();
-      osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
+      if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能启动测量
+      {
+        HalOledShowString(20,0,16,"start");
+        HalOledShowString(20,15,16,"V0.54");
+        HalOledRefreshGram();
+        osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
+      }
       break;
       
     case GENERICAPP_CLUSTERID_STOP:  
-      HalOledShowString(20,0,16,"stop");
-      HalOledShowString(20,15,16,"V0.54");
-      HalOledRefreshGram();      
-      osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
+      if(EcgSystemStatus == ECG_ONLINE_MEASURE) // 在线测量才能停止测量
+      {
+        HalOledShowString(20,0,16,"stop");
+        HalOledShowString(20,15,16,"V0.54");
+        HalOledRefreshGram();      
+        osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
+      }
+      break;
+      
+    case GENERICAPP_CLUSTERID_SYNC:
+      if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能同步
+      {
+        HalOledShowString(20,0,16,"SYNC");
+        HalOledShowString(20,15,16,"V0.54");
+        HalOledRefreshGram();
+        
+        EcgSystemStatus = ECG_SYNC_DATA;
+        osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
+      }
       break;
   }
 }
@@ -667,5 +712,227 @@ void GenericApp_LeaveNetwork( void )
 
   NLME_LeaveReq( &leaveReq );
 }
+
+
+/*********************************************************************
+ * @fn      GenericApp_GetWriteName
+ *
+ * @brief   Get the RTC time and make file name.
+ *
+ * @param   char *
+ *          0:D/20xx-xx-xx xx-xx-xx x.txt + \0 = 30Byte
+ *
+ * @return  
+ *
+ */
+void GenericApp_GetWriteName( char *fileName )
+{
+  RTCStruct_t RTCStruct;
+  HalRTCGetOrSetFull(RTC_DS1302_GET,&RTCStruct);
+
+  // Make file name
+  fileName[0] = '0';
+  fileName[1] = ':';
+  fileName[2] = 'D';
+  fileName[3] = '/';
+  fileName[4] = '2';
+  fileName[5] = '0';
+  fileName[6] = RTCStruct.year/10 + '0';
+  fileName[7] = RTCStruct.year%10 + '0';
+  fileName[8] = '-';
+  fileName[9] = RTCStruct.month/10 + '0';
+  fileName[10] = RTCStruct.month%10 + '0';
+  fileName[11] = '-';
+  fileName[12] = RTCStruct.date/10 + '0';
+  fileName[13] = RTCStruct.date%10 + '0';
+  fileName[14] = ' ';
+  fileName[15] = RTCStruct.hour/10 + '0';
+  fileName[16] = RTCStruct.hour%10 + '0';
+  fileName[17] = '-';
+  fileName[18] = RTCStruct.min/10 + '0';
+  fileName[19] = RTCStruct.min%10 + '0';
+  fileName[20] = '-';
+  fileName[21] = RTCStruct.sec/10 + '0';
+  fileName[22] = RTCStruct.sec%10 + '0';
+  fileName[23] = ' ';  
+  fileName[24] = RTCStruct.week + '0';
+  fileName[25] = '.';
+  fileName[26] = 't';
+  fileName[27] = 'x';
+  fileName[28] = 't';
+  fileName[29] = '\0';
+}
+
+
+/*********************************************************************
+ * @fn      GenericApp_SyncData
+ *
+ * @brief   Sync data.同步的状态机设计
+ *
+ * @param  
+ *
+ * @return  
+ *
+ */
+void GenericApp_SyncData(void)
+{
+  
+  switch(SyncStatus)
+  {
+  case SYNC_READ_DIR:
+    if(GenericApp_OpenDir() == TRUE)
+    {
+      f_open(file,(char *)pathname,FA_OPEN_EXISTING | FA_READ); //  打开文件
+      // 申请空间
+      dataSendBuffer = osal_mem_alloc(sizeof(uint8)*500);
+      if(dataSendBuffer == NULL)
+      {
+        f_close(file);
+        EcgSystemStatus = ECG_ONLINE_IDLE; // 同步结束
+        return;
+      }
+      // 切换状态并启动下次时间
+      SyncStatus = SYNC_READ_DATA;
+      osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
+    }
+    else
+    {
+      EcgSystemStatus = ECG_ONLINE_IDLE; // 同步结束
+      AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                       GENERICAPP_CLUSTERID,
+                       0,
+                       NULL,
+                       &GenericApp_TransID,
+                       AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
+      EcgSystemStatus = ECG_ONLINE_IDLE;
+      HalOledShowString(0,0,32,"ON-IDLE");
+      HalOledRefreshGram();
+    }
+    
+    break;
+  case SYNC_READ_DATA:
+    f_read(file,dataSendBuffer,500,&br);
+    dataSendBufferTemp = dataSendBuffer;
+    br = br/20;
+    if(br == 0) // 没有数据了
+      SyncStatus = SYNC_CLOSE_FILE;
+    else
+      SyncStatus = SYNC_SEND_DATA;
+    osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
+    break;
+  case SYNC_SEND_DATA:
+    if(br == 0) //该buffer同步结束
+      SyncStatus = SYNC_READ_DATA;
+    else
+    {
+      // 发送数据
+      AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
+                       GENERICAPP_CLUSTERID,
+                       ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET*2,
+                       dataSendBufferTemp,
+                       &GenericApp_TransID,
+                       AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
+      br--;
+      dataSendBufferTemp += 20;
+      
+    }
+    // 50ms后再次启动事件
+    osal_start_timerEx( GenericApp_TaskID,
+                        GENERICAPP_ECG_SYNC,
+                        GENERICAPP_SEND_SYNC_PACKET_TIMEOUT );
+    break;
+    
+  case SYNC_CLOSE_FILE:
+    // 关闭文件释放buffer
+    f_close(file);
+    f_unlink((char *)pathname);
+    osal_mem_free(dataSendBuffer);
+    // 切换状态，1s后再次启动同步事件
+    SyncStatus = SYNC_READ_DIR;
+    osal_start_timerEx( GenericApp_TaskID,
+                        GENERICAPP_ECG_SYNC,
+                        GENERICAPP_SEND_SYNC_FILE_TIMEOUT );
+    break;
+  }
+
+}
+
+
+/*********************************************************************
+ * @fn      GenericApp_OpenDir
+ *
+ * @brief   找到指定目录下文件
+ *
+ * @param  
+ *
+ * @return  true is over,flase is not over
+ *
+ */
+bool GenericApp_OpenDir(void)
+{
+  uint8 res = 0;
+  DIR *fddir = 0;         // 目录
+  FILINFO *finfo = 0;     // 文件信息
+  uint8 *fn = 0;          // 长文件名
+  
+  // initilize pathname
+  strcpy(pathname,"0:D/");
+  
+  // 申请内存
+  fddir = (DIR *)osal_mem_alloc(sizeof(DIR));
+  finfo = (FILINFO *)osal_mem_alloc(sizeof(FILINFO));
+  if(fddir == NULL || finfo == NULL)
+  {
+    if(fddir != NULL)
+      osal_mem_free(fddir);
+    if(finfo != NULL)
+      osal_mem_free(finfo);
+    return FALSE;
+  }
+  
+  finfo->lfsize = 28 + 1;
+  finfo->lfname = osal_mem_alloc(finfo->lfsize);
+  if(finfo->lfname == NULL)
+  {
+    osal_mem_free(finfo->lfname);
+    osal_mem_free(fddir);
+    osal_mem_free(finfo);
+    return FALSE;
+  }
+  
+  // 打开源目录
+  res = f_opendir(fddir,"0:D");
+
+  if(res == 0)  // 打开目录成功
+  {
+    while(res == 0)
+    {
+      res = f_readdir(fddir,finfo);   //读取目录下的一个文件
+     
+      if(res != FR_OK || finfo->fname[0] == 0) // 出错或者读到了结尾
+      {
+        osal_mem_free(finfo->lfname);
+        osal_mem_free(fddir);
+        osal_mem_free(finfo);
+        return FALSE;
+      }
+      
+      if(finfo->fname[0] == '.') // 忽略上层文件
+        continue;
+      
+      /* 存在文件,保存字符串 */
+      fn = (uint8 *)(*finfo->lfname?finfo->lfname:finfo->fname);
+      strcat((char *)pathname,(char *)fn);
+      
+      break;
+    }
+  }
+  
+  osal_mem_free(finfo->lfname);
+  osal_mem_free(fddir);
+  osal_mem_free(finfo);
+  return TRUE;  
+}
+
 /*********************************************************************
 *********************************************************************/
