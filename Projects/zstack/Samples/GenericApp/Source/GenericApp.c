@@ -555,7 +555,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能启动测量
       {
         HalOledShowString(20,0,16,"start");
-        HalOledShowString(20,15,16,"V0.54");
+        HalOledShowString(20,15,16,"V0.56");
         HalOledRefreshGram();
         osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
       }
@@ -565,7 +565,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       if(EcgSystemStatus == ECG_ONLINE_MEASURE) // 在线测量才能停止测量
       {
         HalOledShowString(20,0,16,"stop");
-        HalOledShowString(20,15,16,"V0.54");
+        HalOledShowString(20,15,16,"V0.56");
         HalOledRefreshGram();      
         osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
       }
@@ -575,7 +575,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能同步
       {
         HalOledShowString(20,0,16,"SYNC");
-        HalOledShowString(20,15,16,"V0.54");
+        HalOledShowString(20,15,16,"V0.56");
         HalOledRefreshGram();
         
         EcgSystemStatus = ECG_SYNC_DATA;
