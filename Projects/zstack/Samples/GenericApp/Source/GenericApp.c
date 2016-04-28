@@ -99,7 +99,7 @@ const cId_t GenericApp_InClusterList[GENERICAPP_IN_CLUSTERS] =
 const cId_t GenericApp_OutClusterList[GENERICAPP_OUT_CLUSTERS] =
 {
   GENERICAPP_CLUSTERID,
-  GENERICAPP_CLUSTERID_SYNC_OVER,
+  GENERICAPP_CLUSTERID_ECG_SYNC_OVER,
   GENERICAPP_CLUSTERID_ECG_RESULT
 };
 
@@ -800,7 +800,7 @@ void GenericApp_SyncData(void)
     {
       EcgSystemStatus = ECG_ONLINE_IDLE; // Í¬²½½áÊø
       AF_DataRequest( &GenericApp_DstAddr, &GenericApp_epDesc,
-                       GENERICAPP_CLUSTERID_SYNC_OVER,
+                       GENERICAPP_CLUSTERID_ECG_SYNC_OVER,
                        0,
                        NULL,
                        &GenericApp_TransID,

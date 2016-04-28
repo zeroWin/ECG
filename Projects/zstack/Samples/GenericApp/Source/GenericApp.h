@@ -66,13 +66,14 @@ extern "C"
 #define GENERICAPP_IN_CLUSTERS        4
 #define GENERICAPP_OUT_CLUSTERS       3  
 
-#define GENERICAPP_CLUSTERID               1   // I/O
-#define GENERICAPP_CLUSTERID_START         2   // I
-#define GENERICAPP_CLUSTERID_STOP          3   // I
-#define GENERICAPP_CLUSTERID_SYNC          4   // I
-#define GENERICAPP_CLUSTERID_SYNC_OVER     5   // O
-//#define GENERICAPP_CLUSTERID_TEMPR_RESULT  6   // O
-#define GENERICAPP_CLUSTERID_ECG_RESULT    7   // O
+#define GENERICAPP_CLUSTERID                  0x0001   // I/O
+#define GENERICAPP_CLUSTERID_START            0x0010   // I
+#define GENERICAPP_CLUSTERID_STOP             0x0011   // I
+#define GENERICAPP_CLUSTERID_SYNC             0x0020   // I
+#define GENERICAPP_CLUSTERID_ECG_SYNC_OVER    0x0021   // O
+//#define GENETICAPP_CLUSTERID_TEMPR_SYNC_OVER  0x0022   //O
+//#define GENERICAPP_CLUSTERID_TEMPR_RESULT   0x0030   // O
+#define GENERICAPP_CLUSTERID_ECG_RESULT       0x0031   // O
   
   
 // Send SYNC Message Timeout
