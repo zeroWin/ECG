@@ -165,6 +165,8 @@ void GenericApp_HandleBufferFull( void );
 void GenericApp_GetWriteName( char *fileName );
 void GenericApp_SyncData(void);
 bool GenericApp_OpenDir(void);
+void GenericApp_OledDeviceStatusShow(uint8 statusID);
+void GenericApp_OledWorkStatusShow(WorkStatus_t WorkStatus);
 /*********************************************************************
  * NETWORK LAYER CALLBACKS
  */
@@ -230,7 +232,8 @@ void GenericApp_Init( byte task_id )
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
 #endif
-  HalOledShowString(0,0,32,"OFF-IDLE");
+  GenericApp_OledWorkStatusShow(IDLE_STATUS);
+  GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
   HalOledRefreshGram();
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
@@ -326,7 +329,7 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // 离线状态
     {
       EcgSystemStatus = ECG_OFFLINE_MEASURE;
-      HalOledShowString(0,0,32,"OFF-MEAS");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_MEASURE_ID);
       
       // 打开文件并创建文件 保证不会有两次测量的数据混在一个文件中
       GenericApp_GetWriteName(fileName);
@@ -337,12 +340,13 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     else if ( EcgSystemStatus == ECG_ONLINE_IDLE ) // 在线状态
     {
       EcgSystemStatus = ECG_ONLINE_MEASURE;
-      HalOledShowString(0,0,32,"ON-MEAS");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_MEASURE_ID);
       
       HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_ZIGBEE );
     }
     HalOledRefreshGram();
     
+    //osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
     // return unprocessed events
     return (events ^ GENERICAPP_START_MEASURE);
   }
@@ -364,6 +368,7 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     // Close Measrue
     HalEcgMeasStop();
     
+    GenericApp_OledWorkStatusShow(IDLE_STATUS);
     // Change status
     if( EcgSystemStatus == ECG_OFFLINE_MEASURE ) // 离线测量
     {
@@ -371,13 +376,13 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       f_close(file);
       
       EcgSystemStatus = ECG_OFFLINE_IDLE;
-      HalOledShowString(0,0,32,"OFF-IDLE");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
       
     }
     else if ( EcgSystemStatus == ECG_ONLINE_MEASURE ) // 在线测量
     {
       EcgSystemStatus = ECG_ONLINE_IDLE;
-      HalOledShowString(0,0,32,"ON-IDLE");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_IDLE_ID);
     }
     HalOledRefreshGram();
     
@@ -399,6 +404,30 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     
     // return unprocessed events
     return (events ^ GENERICAPP_ECG_SYNC);
+  }  
+  
+  
+  // show measure work
+  if ( events & GENERICAPP_ECG_MEASURE_LOGO )
+  {
+    if(EcgSystemStatus == ECG_ONLINE_MEASURE || EcgSystemStatus == ECG_OFFLINE_MEASURE || EcgSystemStatus == ECG_SYNC_DATA)
+    {
+      GenericApp_OledWorkStatusShow(WORK_STATUS);
+      switch(EcgSystemStatus)
+      {
+        case ECG_ONLINE_MEASURE:GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_MEASURE_ID);break;
+        case ECG_OFFLINE_MEASURE:GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_MEASURE_ID);break;
+        case ECG_SYNC_DATA:GenericApp_OledDeviceStatusShow(DEVICE_INFO_SYNC_DATA_ID);break;
+        default:break;
+      }
+      HalOledRefreshGram();
+      osal_start_timerEx( GenericApp_TaskID,
+                          GENERICAPP_ECG_MEASURE_LOGO,
+                          GENERICAPP_MEASURE_STATUS_SHOW );
+    }
+    
+    // return unprocessed events
+    return (events ^ GENERICAPP_ECG_MEASURE_LOGO);
   }  
   
   // Discard unknown events
@@ -490,7 +519,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       GenericApp_LeaveNetwork(); 
       EcgSystemStatus = ECG_CLOSING;
      
-      HalOledShowString(0,0,32,"CLOSE");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_CLOSING_ID);
       HalOledRefreshGram();
       
     }
@@ -500,7 +529,7 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       ZDApp_StopJoiningCycle();
       EcgSystemStatus = ECG_OFFLINE_IDLE;
       
-      HalOledShowString(0,0,32,"OFF-IDLE");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
       HalOledRefreshGram();
     }
     else // Online , Offline measure , closing , SYNC
@@ -516,7 +545,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       osal_set_event(GenericApp_TaskID,GENERICAPP_STOP_MEASURE);
     else
     {} // find network , closing , SYNC 
-
   }
 
     
@@ -553,33 +581,20 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       
     case GENERICAPP_CLUSTERID_START:
       if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能启动测量
-      {
-        HalOledShowString(20,0,16,"start");
-        HalOledShowString(20,15,16,"V0.56");
-        HalOledRefreshGram();
         osal_set_event( GenericApp_TaskID , GENERICAPP_START_MEASURE );
-      }
       break;
       
     case GENERICAPP_CLUSTERID_STOP:  
       if(EcgSystemStatus == ECG_ONLINE_MEASURE) // 在线测量才能停止测量
-      {
-        HalOledShowString(20,0,16,"stop");
-        HalOledShowString(20,15,16,"V0.56");
-        HalOledRefreshGram();      
         osal_set_event( GenericApp_TaskID , GENERICAPP_STOP_MEASURE );
-      }
       break;
       
     case GENERICAPP_CLUSTERID_SYNC:
       if(EcgSystemStatus == ECG_ONLINE_IDLE)  // 在线空闲才能同步
       {
-        HalOledShowString(20,0,16,"SYNC");
-        HalOledShowString(20,15,16,"V0.56");
-        HalOledRefreshGram();
-        
         EcgSystemStatus = ECG_SYNC_DATA;
         osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
+        //osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
       }
       break;
   }
@@ -599,7 +614,7 @@ void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
   if( GenericApp_NwkStateTemp == DEV_END_DEVICE) //connect to GW
   {
       EcgSystemStatus = ECG_ONLINE_IDLE;
-      HalOledShowString(0,0,32,"ON-IDLE");
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_IDLE_ID);
   }
   else if( EcgSystemStatus != ECG_OFFLINE_IDLE) // Find network -- 1.coordinate lose 2.first connect to coordinate 
   { // 关闭搜索后，可能由于OSAL的timer事件设置，再进入一次ZDO_STATE_CHANGE，上面的判断就是为了排除这种情况
@@ -607,7 +622,8 @@ void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
       HalEcgMeasStop();        // stop measure
     
     EcgSystemStatus = ECG_FIND_NETWORK;
-    HalOledShowString(0,0,32,"FIND-NWK");     
+    GenericApp_OledWorkStatusShow(IDLE_STATUS);
+    GenericApp_OledDeviceStatusShow(DEVICE_INFO_FIND_NWK_ID);
   }
     
   HalOledRefreshGram();
@@ -667,11 +683,11 @@ void GenericApp_EcgMeasCB(void)
   BufOpStatus_t OpStatus;
   
   //采集数据
-  //ECGSample = HalEcgMeasSampleVal();
-  ECGSample = a;
-  a++;
-  if( a == 91 )
-    a = 65;
+  ECGSample = HalEcgMeasSampleVal();
+//  ECGSample = a;
+//  a++;
+//  if( a == 91 )
+//    a = 65;
   
   //Write to buffer
   OpStatus = HalEcgMeasWriteToBuf(ECGSample);
@@ -794,6 +810,7 @@ void GenericApp_SyncData(void)
       }
       // 切换状态并启动下次时间
       SyncStatus = SYNC_READ_DATA;
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_SYNC_DATA_ID);
       osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
     }
     else
@@ -806,10 +823,10 @@ void GenericApp_SyncData(void)
                        &GenericApp_TransID,
                        AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
       EcgSystemStatus = ECG_ONLINE_IDLE;
-      HalOledShowString(0,0,32,"ON-IDLE");
-      HalOledRefreshGram();
+      GenericApp_OledWorkStatusShow(IDLE_STATUS);
+      GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_IDLE_ID);
     }
-    
+    HalOledRefreshGram();
     break;
   case SYNC_READ_DATA:
     f_read(file,dataSendBuffer,500,&br);
@@ -934,6 +951,86 @@ bool GenericApp_OpenDir(void)
   osal_mem_free(finfo);
   return TRUE;  
 }
+
+
+/*********************************************************************
+ * @fn      GenericApp_OledDeviceStatusShow
+ *
+ * @brief   显示当前设备状态
+ *
+ * @param  
+ *
+ * @return  
+ *
+ */
+void GenericApp_OledDeviceStatusShow(uint8 statusID)
+{
+  switch(statusID)
+  {
+    case DEVICE_INFO_ONLINE_IDLE_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_ONLINE_IDLE);
+      break;
+      
+    case DEVICE_INFO_OFFLINE_IDLE_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_OFFLINE_IDLE);
+      break;
+
+    case DEVICE_INFO_ONLINE_MEASURE_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_ONLINE_MEASURE);
+      break;
+  
+    case DEVICE_INFO_OFFLINE_MEASURE_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_OFFLINE_MEASURE);
+      break;
+      
+    case DEVICE_INFO_FIND_NWK_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_FIND_NWK);
+      break;
+      
+    case DEVICE_INFO_CLOSING_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_CLOSING);
+      break;
+      
+    case DEVICE_INFO_ERROR_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_ERROR);
+      break;
+
+    case DEVICE_INFO_SYNC_DATA_ID:
+      HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_SYNC_DATA);
+      break;
+  } 
+}
+
+
+/*********************************************************************
+ * @fn      GenericApp_OledWorkStatusShow
+ *
+ * @brief   闪烁屏幕中间指示正在工作
+ *
+ * @param  
+ *
+ * @return  
+ *
+ */
+void GenericApp_OledWorkStatusShow(WorkStatus_t WorkStatus)
+{
+  static uint8 num_point = 1;
+  if(WorkStatus == WORK_STATUS)
+  {
+    switch(num_point)
+    {
+      case 1:HalOledShowString(10,8,64,"-");HalOledShowString(30,8,64,"-");HalOledShowString(50,8,64,"-");HalOledShowString(70,8,64,"-");num_point++;break;
+      case 2:HalOledShowString(10,8,32,"     ");num_point=1;break;
+    }
+  }
+  
+  if(WorkStatus == IDLE_STATUS)
+  {
+    HalOledShowString(10,8,64,"-");HalOledShowString(30,8,64,"-");HalOledShowString(50,8,64,"-");HalOledShowString(70,8,64,"-");
+    num_point = 1;
+  }
+}
+
 
 /*********************************************************************
 *********************************************************************/

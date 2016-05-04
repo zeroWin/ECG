@@ -83,6 +83,9 @@ extern "C"
 // Sample ECG Timeout
 #define GENERICAPP_SAMPLE_ECG_TIMEOUT 8000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
   
+// Measure status show timeout
+#define GENERICAPP_MEASURE_STATUS_SHOW      500     // 500ms闪烁一次
+  
 // Application Events (OSAL) - These are bit weighted definitions.
   // 除了Ox8000-SYS_EVENT_MSG均可用，一共可以注册15个用户事件
 //#define GENERICAPP_SEND_MSG_EVT       0x0001
@@ -91,6 +94,37 @@ extern "C"
 #define GENERICAPP_STOP_MEASURE       0x0004
 #define GENERICAPP_ECG_MEAS_BUFF_FULL 0x0008
 #define GENERICAPP_ECG_SYNC           0x0010
+#define GENERICAPP_ECG_MEASURE_LOGO   0x0020  
+  
+/* OLED show coordinates*/
+#define DEVICE_INFO_X               10
+#define DEVICE_INFO_Y               0
+#define DEVICE_INFO_SIZE            12
+
+#define DEVICE_INFO_ONLINE_IDLE_ID      1
+#define DEVICE_INFO_ONLINE_IDLE         "On-Ready "
+  
+#define DEVICE_INFO_OFFLINE_IDLE_ID     2
+#define DEVICE_INFO_OFFLINE_IDLE        "Off-Ready"
+
+#define DEVICE_INFO_ONLINE_MEASURE_ID   3
+#define DEVICE_INFO_ONLINE_MEASURE      "On-Meas  "
+
+#define DEVICE_INFO_OFFLINE_MEASURE_ID  4 
+#define DEVICE_INFO_OFFLINE_MEASURE     "Off-Meas "
+  
+#define DEVICE_INFO_FIND_NWK_ID         5
+#define DEVICE_INFO_FIND_NWK            "Find-NWK "
+  
+#define DEVICE_INFO_CLOSING_ID          6
+#define DEVICE_INFO_CLOSING             "Closing  "
+  
+#define DEVICE_INFO_ERROR_ID            7
+#define DEVICE_INFO_ERROR               "Error    "
+  
+#define DEVICE_INFO_SYNC_DATA_ID        8
+#define DEVICE_INFO_SYNC_DATA           "Sync-data"
+  
 /*********************************************************************
  * MACROS
  */
@@ -116,6 +150,12 @@ typedef enum
   SYNC_SEND_DATA,
   SYNC_CLOSE_FILE,
 } SyncStatus_t;
+
+typedef enum
+{
+  WORK_STATUS,
+  IDLE_STATUS
+} WorkStatus_t;
 /*********************************************************************
  * FUNCTIONS
  */

@@ -103,6 +103,11 @@ extern void HalOledOnOff(uint8 mode);
  */
 extern void halMcuWaitUs(uint16 microSecs); 
 
+/*
+ * 在OLED上显示电量符号
+ */
+extern void HalOledShowPowerSymbol(uint8 x,uint8 y,uint8 mode,uint8 power_num);
+
 #ifdef __cplusplus
 }
 #endif  
