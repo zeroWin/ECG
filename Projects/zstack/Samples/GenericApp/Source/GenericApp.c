@@ -504,6 +504,13 @@ void GenericApp_ProcessZDOMsgs( zdoIncomingMsg_t *inMsg )
  */
 void GenericApp_HandleKeys( byte shift, byte keys )
 {
+  if(EcgLowPower == ECG_LOW_POWER) // 处于低功耗状态
+  {
+    HalOledOnOff(HAL_OLED_MODE_ON);
+    EcgLowPower = ECG_WORK;
+    return;
+  }
+  
   if(keys & HAL_KEY_SW_6)   //Link button be pressed
   {
     if( EcgSystemStatus == ECG_OFFLINE_IDLE ) // 离线-->寻找网络
@@ -683,11 +690,11 @@ void GenericApp_EcgMeasCB(void)
   BufOpStatus_t OpStatus;
   
   //采集数据
-  ECGSample = HalEcgMeasSampleVal();
-//  ECGSample = a;
-//  a++;
-//  if( a == 91 )
-//    a = 65;
+//  ECGSample = HalEcgMeasSampleVal();
+  ECGSample = a;
+  a++;
+  if( a == 91 )
+    a = 65;
   
   //Write to buffer
   OpStatus = HalEcgMeasWriteToBuf(ECGSample);

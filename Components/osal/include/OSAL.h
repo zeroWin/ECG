@@ -25,7 +25,7 @@
   its documentation for any purpose.
 
   YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
-  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  PROVIDED “AS IS?WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
   INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
   NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
   TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
@@ -101,9 +101,16 @@ typedef struct
 
 typedef void * osal_msg_q_t;
 
+typedef enum
+{
+  ECG_LOW_POWER,
+  ECG_WORK
+} EcgLowPower_t;
+
 /*********************************************************************
  * GLOBAL VARIABLES
  */
+extern EcgLowPower_t EcgLowPower;
 
 /*********************************************************************
  * FUNCTIONS
