@@ -223,6 +223,9 @@ void GenericApp_Init( byte task_id )
   EcgSystemStatus = ECG_OFFLINE_IDLE;
   SyncStatus = SYNC_READ_DIR;
     
+  // Init Low power status
+  EcgLowPower = ECG_WORK;
+  
   // Init SD card and fatfs
   while(SD_Initialize());
   exfuns_init();      // 申请文件系统内存
