@@ -87,15 +87,6 @@
 /**************************************************************************************************
  *                                        INNER GLOBAL VARIABLES
  **************************************************************************************************/
-/* OLED_2832HSWEG02 , 128 x 32 pixel 
-   OLED的显存
-   存放格式如下.
-   [0]0 1 2 3 ... 127	
-   [1]0 1 2 3 ... 127	
-   [2]0 1 2 3 ... 127	
-   [3]0 1 2 3 ... 127
-*/
-unsigned char OLED_GRAM[128][8];
 
 /**************************************************************************************************
  *                                        FUNCTIONS - Local
@@ -109,6 +100,7 @@ void writed(unsigned char d);
 uint32 oled_pow(uint8 m,uint8 n);
 
 void HalOledDrawPoint(uint8 x,uint8 y,uint8 t);
+void Set_xy(uint8 x,uint8 y);
 /**************************************************************************************************
  *                                        FUNCTIONS - API
  **************************************************************************************************/
@@ -171,121 +163,142 @@ void HalOledInit(void)
 
   writec(0xA4);
   writec(0xA6);
-
-
-  /* address setting */
-  writec(0x20);    //Set Memory Addressing Mode   2 bytes cmd
-  writec(0x00);    //A[1:0] = 00b, Horizontal Addressing Mode
-
-  writec(0x21);    //Setup column start and end address
-  writec(0x00);    //A[6:0] : Column start address, range : 0-127d, (RESET=0d)
-  writec(0x7f);    //B[6:0]: Column end address, range : 0-127d, (RESET =127d)
-
-  writec(0x22);    //Setup page start and end address
-  writec(0x00);	   //A[2:0] : Page start Address, range : 0-7d, (RESET=0d)
-  writec(0x07);    //B[2:0] : Page end Address, range : 0-7d, (RESET = 7d)
-	 
+  
   writec(0xAF);    //display on
   HalOledClear();
 }
 
 
-/**************************************************************************************************
- * @fn      HalOledDrawPoint
- *
- * @brief   Draw a point on OLED
- *
- * @param   
- *
- * @return  None
- **************************************************************************************************/
-void HalOledDrawPoint(uint8 x,uint8 y,uint8 t)
-{
-  uint8 pos,bx,temp=0;
-  if(x>127||y>63)return;//超出范围了.
-  pos=y/8;
-  bx=y%8;
-  temp=1<<(bx);
-  if(t)OLED_GRAM[x][pos]|=temp;
-  else OLED_GRAM[x][pos]&=~temp;
-}
-
-
-/**************************************************************************************************
- * @fn      HalOledShowChar
- *
- * @brief   Show a char on OLED
- *
- * @param   size:12/16/32
- *
- * @return  None
- **************************************************************************************************/
 void HalOledShowChar(uint8 x,uint8 y,uint8 chr,uint8 size,uint8 mode)
 {
-  uint8 temp,t,t1;
-  uint8 y0=y;
+  uint8 temp,t;
+  uint8 x0=x;
+  uint8 y0=y/8;
   chr=chr-' ';//得到偏移后的值
   if(size == 64)
   {
-    for(t=0;t<140;t++)
+    // 设置开始位置
+    Set_xy(x0,y0);
+    // 写入数据
+    I2C_Start();
+    I2C_O(0x78);
+    I2C_Ack();
+    I2C_O(0x40);
+    I2C_Ack();  
+    
+    for(t=0;t<60;++t)
     {
-      temp = oled_testing_point[t]; //调用20X56大小的"-"
-      for(t1=0;t1<8;t1++)
+      temp = oled_testing_point[t]; //调用20X32大小的"-"
+      I2C_O(temp);
+      I2C_Ack();
+      ++x0;
+      if(x0-x == 20)  // 该行写完
       {
-        if(temp&0x80)HalOledDrawPoint(x,y,mode);
-        else HalOledDrawPoint(x,y,!mode);
-        temp<<=1;
-        y++;
-        if((y-y0)==56)
+        I2C_Stop();
+        x0 = x;
+        if(t != 59)
         {
-          y=y0;
-          x++;
-          break;
+          ++y0;
+          // 设置开始位置
+          Set_xy(x0,y0);
+          I2C_Start();
+          I2C_O(0x78);
+          I2C_Ack();
+          I2C_O(0x40);
+          I2C_Ack();            
         }
-      }  	 
+      }
     }
   }
   else if(size == 32)
   {
-    for(t=0;t<112;t++)
+    // 设置开始位置
+    Set_xy(x0,y0);
+    // 写入数据
+    I2C_Start();
+    I2C_O(0x78);
+    I2C_Ack();
+    I2C_O(0x40);
+    I2C_Ack();  
+    
+    for(t=0;t<96;++t)
     {
-      temp = oled_asc3_3216[chr][t]; //调用16X56字体
-      for(t1=0;t1<8;t1++)
+      temp = oled_asc3_3216[chr][t]; //调用16X48字体
+      I2C_O(temp);
+      I2C_Ack();
+      ++x0;
+      if(x0-x == 16)  // 该行写完
       {
-        if(temp&0x80)HalOledDrawPoint(x,y,mode);
-        else HalOledDrawPoint(x,y,!mode);
-        temp<<=1;
-        y++;
-        if((y-y0)==56)
+        I2C_Stop();
+        x0 = x;
+        if(t != 95)
         {
-          y=y0;
-          x++;
-          break;
+          ++y0;
+          // 设置开始位置
+          Set_xy(x0,y0);
+          I2C_Start();
+          I2C_O(0x78);
+          I2C_Ack();
+          I2C_O(0x40);
+          I2C_Ack();            
         }
-      }  	 
+      }
+    }   
+  }
+  else if(size == 12)
+  {
+    // 设置开始位置
+    Set_xy(x0,y0);
+    // 写入数据
+    I2C_Start();
+    I2C_O(0x78);
+    I2C_Ack();
+    I2C_O(0x40);
+    I2C_Ack();  
+    
+    for(t=0;t<size;++t)
+    {
+      temp = oled_asc2_1206[chr][t]; //调用20X32大小的"-"
+      I2C_O(temp);
+      I2C_Ack();
+      ++x0;
+      if(x0-x == size/2)  // 该行写完
+      {
+        I2C_Stop();
+        x0 = x;
+        if(t != size-1)
+        {
+          ++y0;
+          // 设置开始位置
+          Set_xy(x0,y0);
+          I2C_Start();
+          I2C_O(0x78);
+          I2C_Ack();
+          I2C_O(0x40);
+          I2C_Ack();            
+        }
+      }
     }
   }
-  else
-  {//单点模式			   
-    for(t=0;t<size;t++)
-    {   
-      if(size==12)temp=oled_asc2_1206[chr][t];  //调用1206字体
-      else temp=oled_asc2_1608[chr][t];		 //调用1608字体 ,每次Load一个byte，含自上到下，8个point	                          
-      for(t1=0;t1<8;t1++)
-      {
-        if(temp&0x80)HalOledDrawPoint(x,y,mode);
-        else HalOledDrawPoint(x,y,!mode);
-        temp<<=1;
-        y++;
-        if((y-y0)==size)
-        {
-          y=y0;
-          x++;
-          break;
-        }
-      }  	 
-    }
-  }
+  
+}
+
+
+/**************************************************************************************************
+ * @fn      Set_xy
+ *
+ * @brief   Set write local
+ *
+ * @param   
+ *
+ * @return
+ **************************************************************************************************/
+void Set_xy(uint8 x,uint8 y)
+{
+    writec(y|0xb0);
+    writec(x&0x0f);          //低四位
+    writec(((x&0xf0)>>4)|0x10); //得到高四位
+
 }
 
 
@@ -337,7 +350,7 @@ void HalOledShowString(uint8 x,uint8 y,uint8 size,const uint8 *p)
     if(x>MAX_CHAR_POSX){x=0;y+=16;}
     if(y>MAX_CHAR_POSY){y=x=0;HalOledClear();}
     HalOledShowChar(x,y,*p,size,1);
-    if(size == 64) x += 16;
+    if(size == 64) x += 20;
     else x+=size/2;
     p++;
   } 
@@ -370,39 +383,6 @@ void halMcuWaitUs(uint16 microSecs)
 
 
 /**************************************************************************************************
- * @fn      HalOledRefreshGram
- *
- * @brief   Refresh the OLED Gram
- *
- * @param   none
- *
- * @return  None
- **************************************************************************************************/
-void HalOledRefreshGram(void)
-{
-  uint8 i,n;	
-	
-  I2C_Start();
-        
-  I2C_O(0x78);
-  I2C_Ack();
-  I2C_O(0x40);
-  I2C_Ack();  
-  
-  for(i=0;i<8;i++)  
-  {    
-    for(n=0;n<128;n++)
-    {
-      I2C_O(OLED_GRAM[n][i]);
-      I2C_Ack();	
-    }
-  }
-  
-  I2C_Stop();
-}
-
-
-/**************************************************************************************************
  * @fn      HalOledClear
  *
  * @brief   Clear the OLED
@@ -413,9 +393,26 @@ void HalOledRefreshGram(void)
  **************************************************************************************************/
 void HalOledClear(void) 
 {
-  uint8 i,n;  
-  for(i=0;i<8;i++)for(n=0;n<128;n++)OLED_GRAM[n][i]=0X00;  
-  HalOledRefreshGram();//更新显示  
+  uint8 x,y;
+  for(y = 0; y < 8; ++y)
+  {
+    // 设置开始位置
+    Set_xy(x,y);
+    // 写入数据
+    I2C_Start();
+    I2C_O(0x78);
+    I2C_Ack();
+    I2C_O(0x40);
+    I2C_Ack();  
+    
+    for(x = 0; x < 128; ++x)
+    {
+      I2C_O(0x00);
+      I2C_Ack();	
+    }
+    I2C_Stop();
+    x = 0;
+  }
 }
 
 

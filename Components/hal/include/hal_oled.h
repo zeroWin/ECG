@@ -87,11 +87,6 @@ extern void HalOledShowNum(uint8 x,uint8 y,uint32 num,uint8 len,uint8 size);
  * Show string on OLED.
  */
 extern void HalOledShowString(uint8 x,uint8 y,uint8 size,const uint8 *p);  
-  
-/*
- * Refresh OLED.
- */
-extern void HalOledRefreshGram(void);
 
 /*
  * Set the OLED ON/OFF.
@@ -107,6 +102,7 @@ extern void halMcuWaitUs(uint16 microSecs);
  * 在OLED上显示电量符号
  */
 extern void HalOledShowPowerSymbol(uint8 x,uint8 y,uint8 mode,uint8 power_num);
+
 
 #ifdef __cplusplus
 }

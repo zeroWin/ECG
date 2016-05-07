@@ -237,7 +237,7 @@ void GenericApp_Init( byte task_id )
 #endif
   GenericApp_OledWorkStatusShow(IDLE_STATUS);
   GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
-  HalOledRefreshGram();
+  
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
 }
@@ -347,9 +347,8 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       
       HalEcgMeasStart( GENERICAPP_SAMPLE_ECG_TIMEOUT , ECG_BUFFER_FOR_ZIGBEE );
     }
-    HalOledRefreshGram();
     
-    //osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
+    osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
     // return unprocessed events
     return (events ^ GENERICAPP_START_MEASURE);
   }
@@ -387,7 +386,6 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
       EcgSystemStatus = ECG_ONLINE_IDLE;
       GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_IDLE_ID);
     }
-    HalOledRefreshGram();
     
     // return unprocessed events
     return (events ^ GENERICAPP_STOP_MEASURE);
@@ -416,14 +414,6 @@ UINT16 GenericApp_ProcessEvent( byte task_id, UINT16 events )
     if(EcgSystemStatus == ECG_ONLINE_MEASURE || EcgSystemStatus == ECG_OFFLINE_MEASURE || EcgSystemStatus == ECG_SYNC_DATA)
     {
       GenericApp_OledWorkStatusShow(WORK_STATUS);
-      switch(EcgSystemStatus)
-      {
-        case ECG_ONLINE_MEASURE:GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_MEASURE_ID);break;
-        case ECG_OFFLINE_MEASURE:GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_MEASURE_ID);break;
-        case ECG_SYNC_DATA:GenericApp_OledDeviceStatusShow(DEVICE_INFO_SYNC_DATA_ID);break;
-        default:break;
-      }
-      HalOledRefreshGram();
       osal_start_timerEx( GenericApp_TaskID,
                           GENERICAPP_ECG_MEASURE_LOGO,
                           GENERICAPP_MEASURE_STATUS_SHOW );
@@ -530,7 +520,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       EcgSystemStatus = ECG_CLOSING;
      
       GenericApp_OledDeviceStatusShow(DEVICE_INFO_CLOSING_ID);
-      HalOledRefreshGram();
       
     }
     else if ( EcgSystemStatus == ECG_FIND_NETWORK ) // 寻找网络-->离线
@@ -540,7 +529,6 @@ void GenericApp_HandleKeys( byte shift, byte keys )
       EcgSystemStatus = ECG_OFFLINE_IDLE;
       
       GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
-      HalOledRefreshGram();
     }
     else // Online , Offline measure , closing , SYNC
     {}//do nothing
@@ -604,7 +592,7 @@ void GenericApp_MessageMSGCB( afIncomingMSGPacket_t *pkt )
       {
         EcgSystemStatus = ECG_SYNC_DATA;
         osal_set_event( GenericApp_TaskID , GENERICAPP_ECG_SYNC );
-        //osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
+        osal_set_event(GenericApp_TaskID,GENERICAPP_ECG_MEASURE_LOGO);
       }
       break;
   }
@@ -636,7 +624,7 @@ void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
     GenericApp_OledDeviceStatusShow(DEVICE_INFO_FIND_NWK_ID);
   }
     
-  HalOledRefreshGram();
+
   
 }
 
@@ -836,12 +824,11 @@ void GenericApp_SyncData(void)
       GenericApp_OledWorkStatusShow(IDLE_STATUS);
       GenericApp_OledDeviceStatusShow(DEVICE_INFO_ONLINE_IDLE_ID);
     }
-    HalOledRefreshGram();
     break;
   case SYNC_READ_DATA:
-    f_read(file,dataSendBuffer,500,&br);
+    f_read(file,dataSendBuffer,ECG_WAVEFORM_READ_ONE_TIME,&br);
     dataSendBufferTemp = dataSendBuffer;
-    br = br/20;
+    br = br/ECG_WAVEFORM_SEND_ONE_TIME;
     if(br == 0) // 没有数据了
       SyncStatus = SYNC_CLOSE_FILE;
     else
@@ -861,7 +848,7 @@ void GenericApp_SyncData(void)
                        &GenericApp_TransID,
                        AF_DISCV_ROUTE, AF_DEFAULT_RADIUS );
       br--;
-      dataSendBufferTemp += 20;
+      dataSendBufferTemp += ECG_WAVEFORM_SEND_ONE_TIME;
       
     }
     // 50ms后再次启动事件
@@ -1029,14 +1016,14 @@ void GenericApp_OledWorkStatusShow(WorkStatus_t WorkStatus)
   {
     switch(num_point)
     {
-      case 1:HalOledShowString(10,8,64,"-");HalOledShowString(30,8,64,"-");HalOledShowString(50,8,64,"-");HalOledShowString(70,8,64,"-");num_point++;break;
-      case 2:HalOledShowString(10,8,32,"     ");num_point=1;break;
+      case 1:HalOledShowString(10,16,64,"-");HalOledShowString(30,16,64,"-");HalOledShowString(50,16,64,"-");num_point++;break;
+      case 2:HalOledShowString(10,16,32,"    ");num_point=1;break;
     }
   }
   
   if(WorkStatus == IDLE_STATUS)
   {
-    HalOledShowString(10,8,64,"-");HalOledShowString(30,8,64,"-");HalOledShowString(50,8,64,"-");HalOledShowString(70,8,64,"-");
+    HalOledShowString(10,16,64,"-");HalOledShowString(30,16,64,"-");HalOledShowString(50,16,64,"-");
     num_point = 1;
   }
 }

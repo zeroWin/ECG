@@ -82,7 +82,7 @@ extern "C"
   
 // Send SYNC Message Timeout
 #define GENERICAPP_SEND_SYNC_FILE_TIMEOUT   1000     // 文件与文件之间同步间隔为1s
-#define GENERICAPP_SEND_SYNC_PACKET_TIMEOUT 80       // 包与包之间同步间隔为80ms
+#define GENERICAPP_SEND_SYNC_PACKET_TIMEOUT 240       // 包与包之间同步间隔为80ms*3
   
 // Sample ECG Timeout
 #define GENERICAPP_SAMPLE_ECG_TIMEOUT 8000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
