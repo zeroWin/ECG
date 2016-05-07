@@ -99,11 +99,13 @@ extern "C"
 #define ECG_MEASURE_RefVol       HAL_ADC_REF_AVDD    //SET VDD=3.3V as Vref
   
 /* pingPong Buffer */
-/* for Send to Network size --- 10 uint16 = 20 byte */
+/* for Send to Network size --- 30 uint16 =  60 byte */
 /* for Send to SD      size --- 256 uint16 = 512 byte */
-#define ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET     10
+#define ECG_WAVEFORM_SAMPLER_NUM_PER_PACKET     30
 #define ECG_WAVEFORM_SAMPLER_NUM_FOR_SD         256  
   
+#define ECG_WAVEFORM_READ_ONE_TIME              480
+#define ECG_WAVEFORM_SEND_ONE_TIME              60
 /* pingPong Buffer Choose */
 #define ECG_BUFFER_FOR_ZIGBEE   0x00
 #define ECG_BUFFER_FOR_SD       0x01
