@@ -170,7 +170,8 @@ uint16 HalEcgMeasSampleVal(void)
 {
   uint16 ECGSample;
   ECGSample = HalAdcRead(ECG_MEASURE_CHANNEL,ECG_MEASURE_RESOLUTION);
-  ECGSample = (uint16)((ECGSample*3*2/0x3FFF)*100);
+  uint32 OneSample = (uint32)ECGSample;
+  ECGSample = (uint16)((OneSample*300)>>13); // 移动13位就是除8192
   return ECGSample;
 }
 
