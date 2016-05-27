@@ -128,7 +128,18 @@ extern "C"
   
 #define DEVICE_INFO_SYNC_DATA_ID        8
 #define DEVICE_INFO_SYNC_DATA           "Sync-data"
+ 
+#define HR_CHAR_X                       18
+#define HR_CHAR_Y                       16
+#define HR_CHAR_SIZE                    32
   
+  
+#define HR_RESULT_X                     58
+#define HR_RESULT_Y                     16
+#define HR_RESULT_SIZE                  32
+  
+#define HR_WAIT_SYMBOL_X                58
+#define HR_WAIT_SYMBOL_Y                39
 /*********************************************************************
  * MACROS
  */

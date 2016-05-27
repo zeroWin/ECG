@@ -186,17 +186,17 @@ void HalOledShowChar(uint8 x,uint8 y,uint8 chr,uint8 size,uint8 mode)
     I2C_O(0x40);
     I2C_Ack();  
     
-    for(t=0;t<60;++t)
+    for(t=0;t<16;++t)
     {
-      temp = oled_testing_point[t]; //调用20X32大小的"-"
+      temp = oled_testing_point[t]; //调用16X8大小的"-"
       I2C_O(temp);
       I2C_Ack();
       ++x0;
-      if(x0-x == 20)  // 该行写完
+      if(x0-x == 16)  // 该行写完
       {
         I2C_Stop();
         x0 = x;
-        if(t != 59)
+        if(t != 15)
         {
           ++y0;
           // 设置开始位置

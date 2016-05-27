@@ -266,7 +266,7 @@ uint8 SD_SendBlock(uint8*buf,uint8 cmd)
 		for(t=0;t<512;t++)SPI1_ReadWriteByte(buf[t]);//提高速度,减少函数传参时间
 	    SD_SPI_ReadWriteByte(DUMMY_DATA);//忽略crc
 	    SD_SPI_ReadWriteByte(DUMMY_DATA);
-		t=SD_SPI_ReadWriteByte(DUMMY_DATA);//接收响应
+            t = SD_SPI_ReadWriteByte(DUMMY_DATA);//接收响应
 		if((t&0x1F)!=0x05)return 2;//响应错误									  					    
 	}						 									  					    
     return 0;//写入成功

@@ -231,12 +231,15 @@ void GenericApp_Init( byte task_id )
   exfuns_init();      // 申请文件系统内存
   f_mount(0,fs);      // 挂载文件系统  
   f_mkdir("0:D");     // 创建文件夹
+  
+  
   // Update the display
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
 #endif
   GenericApp_OledWorkStatusShow(IDLE_STATUS);
   GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
+  HalOledShowString(HR_CHAR_X,HR_CHAR_Y,HR_CHAR_SIZE,"HR");
   
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, End_Device_Bind_rsp );
   ZDO_RegisterForZDOMsg( GenericApp_TaskID, Match_Desc_rsp );
@@ -623,9 +626,6 @@ void GenericApp_HandleNetworkStatus( devStates_t GenericApp_NwkStateTemp)
     GenericApp_OledWorkStatusShow(IDLE_STATUS);
     GenericApp_OledDeviceStatusShow(DEVICE_INFO_FIND_NWK_ID);
   }
-    
-
-  
 }
 
 
@@ -681,11 +681,11 @@ void GenericApp_EcgMeasCB(void)
   BufOpStatus_t OpStatus;
   
   //采集数据
-  ECGSample = HalEcgMeasSampleVal();
-//  ECGSample = a;
-//  a++;
-//  if( a == 91 )
-//    a = 65;
+//  ECGSample = HalEcgMeasSampleVal();
+  ECGSample = a;
+  a++;
+  if( a == 91 )
+    a = 65;
   
   //Write to buffer
   OpStatus = HalEcgMeasWriteToBuf(ECGSample);
@@ -791,7 +791,6 @@ void GenericApp_GetWriteName( char *fileName )
  */
 void GenericApp_SyncData(void)
 {
-  
   switch(SyncStatus)
   {
   case SYNC_READ_DIR:
@@ -1016,14 +1015,15 @@ void GenericApp_OledWorkStatusShow(WorkStatus_t WorkStatus)
   {
     switch(num_point)
     {
-      case 1:HalOledShowString(10,16,64,"-");HalOledShowString(30,16,64,"-");HalOledShowString(50,16,64,"-");num_point++;break;
-      case 2:HalOledShowString(10,16,32,"    ");num_point=1;break;
+      case 1:HalOledShowString(HR_WAIT_SYMBOL_X,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+16,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+32,HR_WAIT_SYMBOL_Y,64,"-");num_point++;break;
+      case 2:HalOledShowString(HR_RESULT_X,HR_RESULT_Y,32,"   ");num_point=1;break;
     }
   }
   
   if(WorkStatus == IDLE_STATUS)
   {
-    HalOledShowString(10,16,64,"-");HalOledShowString(30,16,64,"-");HalOledShowString(50,16,64,"-");
+    HalOledShowString(HR_RESULT_X,HR_RESULT_Y,32,"   ");
+    HalOledShowString(HR_WAIT_SYMBOL_X,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+16,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+32,HR_WAIT_SYMBOL_Y,64,"-");
     num_point = 1;
   }
 }
