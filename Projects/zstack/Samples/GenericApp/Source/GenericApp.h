@@ -106,19 +106,19 @@ extern "C"
 #define DEVICE_INFO_SIZE            12
 
 #define DEVICE_INFO_ONLINE_IDLE_ID      1
-#define DEVICE_INFO_ONLINE_IDLE         "On-Ready "
+#define DEVICE_INFO_ONLINE_IDLE         "On_Ready "
   
 #define DEVICE_INFO_OFFLINE_IDLE_ID     2
-#define DEVICE_INFO_OFFLINE_IDLE        "Off-Ready"
+#define DEVICE_INFO_OFFLINE_IDLE        "Off_Ready"
 
 #define DEVICE_INFO_ONLINE_MEASURE_ID   3
-#define DEVICE_INFO_ONLINE_MEASURE      "On-Meas  "
+#define DEVICE_INFO_ONLINE_MEASURE      "On_Meas  "
 
 #define DEVICE_INFO_OFFLINE_MEASURE_ID  4 
-#define DEVICE_INFO_OFFLINE_MEASURE     "Off-Meas "
+#define DEVICE_INFO_OFFLINE_MEASURE     "Off_Meas "
   
 #define DEVICE_INFO_FIND_NWK_ID         5
-#define DEVICE_INFO_FIND_NWK            "Find-NWK "
+#define DEVICE_INFO_FIND_NWK            "Find_NWK "
   
 #define DEVICE_INFO_CLOSING_ID          6
 #define DEVICE_INFO_CLOSING             "Closing  "
@@ -127,7 +127,7 @@ extern "C"
 #define DEVICE_INFO_ERROR               "Error    "
   
 #define DEVICE_INFO_SYNC_DATA_ID        8
-#define DEVICE_INFO_SYNC_DATA           "Sync-data"
+#define DEVICE_INFO_SYNC_DATA           "Sync_data"
  
 #define HR_CHAR_X                       18
 #define HR_CHAR_Y                       16

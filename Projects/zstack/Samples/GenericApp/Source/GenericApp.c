@@ -681,11 +681,11 @@ void GenericApp_EcgMeasCB(void)
   BufOpStatus_t OpStatus;
   
   //采集数据
-//  ECGSample = HalEcgMeasSampleVal();
-  ECGSample = a;
-  a++;
-  if( a == 91 )
-    a = 65;
+  ECGSample = HalEcgMeasSampleVal();
+//  ECGSample = a;
+//  a++;
+//  if( a == 91 )
+//    a = 65;
   
   //Write to buffer
   OpStatus = HalEcgMeasWriteToBuf(ECGSample);
