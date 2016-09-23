@@ -124,15 +124,15 @@
 #define ACTIVE_LOW        !
 #define ACTIVE_HIGH       !!    /* double negation forces result to be '1' */
 
-/* S1- Link key Press P0.6*/
-#define PUSH1_BV          BV(6)
-#define PUSH1_SBIT        P0_6
+/* S1- Link key Press P1.1*/
+#define PUSH1_BV          BV(7)
+#define PUSH1_SBIT        P0_7
 
 #define PUSH1_POLARITY    ACTIVE_LOW
 
-/* S2- Work key Press P0.7 */
-#define PUSH2_BV          BV(7)
-#define PUSH2_SBIT        P0_7
+/* S2- Work key Press P0.6 */
+#define PUSH2_BV          BV(6)
+#define PUSH2_SBIT        P0_6
 
 #define PUSH2_POLARITY    ACTIVE_LOW
 
@@ -451,7 +451,7 @@ st( \
 
 /* Set to TRUE enable batter monitor usage, FALSE disable it */
 #ifndef HAL_BATTERY_MONITOR
-#define HAL_BATTERY_MONITOR FALSE
+#define HAL_BATTERY_MONITOR TRUE
 #endif
 
 /* Set to TRUE enable ECG measure usage, FALSE disable it */

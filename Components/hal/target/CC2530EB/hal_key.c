@@ -105,29 +105,29 @@
 
 /* CPU port interrupt */
 #define HAL_KEY_WORK_CPU_PORT_0_IF P0IF
-#define HAL_KEY_LINK_CPU_PORT_0_IF P0IF
+#define HAL_KEY_LINK_CPU_PORT_0_IF P1IF
 
-/* Link key is at P0.6 */
-#define HAL_KEY_LINK_PORT   P0
-#define HAL_KEY_LINK_BIT    BV(6)
-#define HAL_KEY_LINK_SEL    P0SEL
-#define HAL_KEY_LINK_DIR    P0DIR
+/* Link key is at P1.1 */
+#define HAL_KEY_LINK_PORT   P1
+#define HAL_KEY_LINK_BIT    BV(1)
+#define HAL_KEY_LINK_SEL    P1SEL
+#define HAL_KEY_LINK_DIR    P1DIR
 
 /* edge interrupt */
-#define HAL_KEY_LINK_EDGEBIT  BV(0)
+#define HAL_KEY_LINK_EDGEBIT  BV(1)
 #define HAL_KEY_LINK_EDGE     HAL_KEY_FALLING_EDGE
 
 
 /* LINK key interrupts */
-#define HAL_KEY_LINK_IEN      IEN1  /* CPU interrupt mask register */
-#define HAL_KEY_LINK_IENBIT   BV(5) /* Mask bit for all of Port_0 */
-#define HAL_KEY_LINK_ICTL     P0IEN /* Port Interrupt Control register */
-#define HAL_KEY_LINK_ICTLBIT  BV(6) /* P0IEN - P0.6 enable/disable bit */
-#define HAL_KEY_LINK_PXIFG    P0IFG /* Interrupt flag at source */
+#define HAL_KEY_LINK_IEN      IEN2  /* CPU interrupt mask register */
+#define HAL_KEY_LINK_IENBIT   BV(4) /* Mask bit for all of Port_1 */
+#define HAL_KEY_LINK_ICTL     P1IEN /* Port Interrupt Control register */
+#define HAL_KEY_LINK_ICTLBIT  BV(1) /* P1IEN - P1.1 enable/disable bit */
+#define HAL_KEY_LINK_PXIFG    P1IFG /* Interrupt flag at source */
 
-/* Work key is at P0.7 */
+/* Work key is at P0.6 */
 #define HAL_KEY_WORK_PORT   P0
-#define HAL_KEY_WORK_BIT    BV(7)
+#define HAL_KEY_WORK_BIT    BV(6)
 #define HAL_KEY_WORK_SEL    P0SEL
 #define HAL_KEY_WORK_DIR    P0DIR
 
@@ -139,7 +139,7 @@
 #define HAL_KEY_WORK_IEN      IEN1  /* CPU interrupt mask register */
 #define HAL_KEY_WORK_IENBIT   BV(5) /* Mask bit for all of Port_0 */
 #define HAL_KEY_WORK_ICTL     P0IEN /* Port Interrupt Control register */
-#define HAL_KEY_WORK_ICTLBIT  BV(7) /* P0IEN - P0.7 enable/disable bit */
+#define HAL_KEY_WORK_ICTLBIT  BV(6) /* P0IEN - P0.6 enable/disable bit */
 #define HAL_KEY_WORK_PXIFG    P0IFG /* Interrupt flag at source */
 
 //“‘∫Û…æµÙ
@@ -322,12 +322,12 @@ void HalKeyPoll (void)
 
   if (HAL_PUSH_BUTTON1())
   {
-    keys |= HAL_KEY_SW_6; //P0.6 LINK_KEY
+    keys |= HAL_KEY_SW_6; //P1.1 LINK_KEY
   }
   
   if(HAL_PUSH_BUTTON2())
   {
-    keys |= HAL_KEY_SW_7; //P0.7 WORK_KEY
+    keys |= HAL_KEY_SW_7; //P0.6 WORK_KEY
   }
 
   /* Invoke Callback if new keys were depressed */

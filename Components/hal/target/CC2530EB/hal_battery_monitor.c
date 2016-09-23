@@ -50,16 +50,16 @@
 /***************************************************************************************************
  *                                             CONSTANTS
  ***************************************************************************************************/
-/* Batter Monitor enable/disable at P0.0
+/* Batter Monitor enable/disable at P1.0
    ECG上没有电量测量模块，暂且随便弄一个管教
 */
-#define BATTER_MONITOR_EN_PORT 0
+#define BATTER_MONITOR_EN_PORT 1
 #define BATTER_MONIROT_EN_PIN  0
 
 /* Set ADC channel and resolution
-   ECG上没有电量测量模块，暂且随便弄一个通道1(P0.1)和分辨率
+   ECG上没有电量测量模块，暂且随便弄一个通道1(P0.7)和分辨率
 */
-#define BATTER_MONITOR_CHANNEL      HAL_ADC_CHANNEL_1
+#define BATTER_MONITOR_CHANNEL      HAL_ADC_CHANNEL_7
 #define BATTER_MONITOR_RESOLUTION   HAL_ADC_RESOLUTION_14
 
 /* Set Reference Voltages*/
@@ -123,14 +123,15 @@ float HalGetBattVol(void)
 {
   float tempVol;
   
-  BATTER_MINITOR_ENABLE;    // Enable BATT_MON_EN, P0.1 high
+  BATTER_MINITOR_ENABLE;    // Enable BATT_MON_EN, P1.0 high
   
+  halMcuWaitUs(1000);
   tempVol = HalAdcRead( BATTER_MONITOR_CHANNEL, BATTER_MONITOR_RESOLUTION ); 
   //max value = 0x3fff/2, battery voltage = input voltage x 2
   //ref volage=3.3V
   tempVol = tempVol*3.3*2*2/0x3fff;    
   
-  BATTER_MINITOR_DISABLE;   // Disable BATT_MON_EN, P0.1 low
+  BATTER_MINITOR_DISABLE;   // Disable BATT_MON_EN, P1.0 low
   
   return tempVol;
 }
@@ -154,64 +155,66 @@ uint8 HalShowBattVol(uint8 fThreshold)
   if(fThreshold == BATTERY_MEASURE_SHOW)//测量
   {
      fBattV = HalGetBattVol();
+     fBattV = HalGetBattVol();
+     fBattV = HalGetBattVol();
      fThreshold_temp = fBattV;
   }
   
   if(fThreshold_temp >= 4.000)
   {
     HalOledShowString(72,0,12,"100%");
-    OLED_ShowPowerSymbol(100,0,1,10);  //100%
+    HalOledShowPowerSymbol(100,0,1,10);  //100%
   }
   else if(fThreshold_temp >= 3.900)
   {
     HalOledShowString(72,0,12," 90%");
-    OLED_ShowPowerSymbol(100,0,1,9);  //90%
+    HalOledShowPowerSymbol(100,0,1,9);  //90%
   }
   else if(fThreshold_temp >= 3.800)
   {
     HalOledShowString(72,0,12," 80%");
-    OLED_ShowPowerSymbol(100,0,1,8);   //80%
+    HalOledShowPowerSymbol(100,0,1,8);   //80%
   }
   else if(fThreshold_temp >= 3.700)
   {
     HalOledShowString(72,0,12," 70%");
-    OLED_ShowPowerSymbol(100,0,1,7);   //70%
+    HalOledShowPowerSymbol(100,0,1,7);   //70%
   }
   else if(fThreshold_temp >= 3.600)
   {
     HalOledShowString(72,0,12," 60%");
-    OLED_ShowPowerSymbol(100,0,1,6);   //60%
+    HalOledShowPowerSymbol(100,0,1,6);   //60%
   }
   else if(fThreshold_temp >= 3.500)
   {
     HalOledShowString(72,0,12," 50%");
-     OLED_ShowPowerSymbol(100,0,1,5);   //50%
+     HalOledShowPowerSymbol(100,0,1,5);   //50%
   }
   else if(fThreshold_temp >= 3.400)
   {
     HalOledShowString(72,0,12," 40%");
-    OLED_ShowPowerSymbol(100,0,1,4);   //40%
+    HalOledShowPowerSymbol(100,0,1,4);   //40%
   }
   else if(fThreshold_temp >= 3.300)
   {
     HalOledShowString(72,0,12," 30%");
-    OLED_ShowPowerSymbol(100,0,1,3);   //30%
+    HalOledShowPowerSymbol(100,0,1,3);   //30%
   }
   else if(fThreshold_temp >= 3.200)
   {
     HalOledShowString(72,0,12," 20%");
-    OLED_ShowPowerSymbol(100,0,1,2);   //20%
+    HalOledShowPowerSymbol(100,0,1,2);   //20%
   }
   else if(fThreshold_temp >= 3.100)
   {
     HalOledShowString(72,0,12," 10%");
-    OLED_ShowPowerSymbol(100,0,1,1);  //10%---警告电量，屏幕只显示LowPower
+    HalOledShowPowerSymbol(100,0,1,1);  //10%---警告电量，屏幕只显示LowPower
     return 1;
   }
   else
   {
     HalOledShowString(72,0,12,"  0%");
-    OLED_ShowPowerSymbol(100,0,1,0);  //0%---屏幕黑屏
+    HalOledShowPowerSymbol(100,0,1,0);  //0%---屏幕黑屏
     return 2;
   }
   return 0;

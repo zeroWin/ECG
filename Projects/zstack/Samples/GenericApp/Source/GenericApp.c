@@ -66,6 +66,7 @@
 #include "hal_ecg_measure.h"
 #include "hal_rtc_ds1302.h"
 #include "hal_SDcard.h"
+#include "hal_battery_monitor.h"
 #include "exfuns.h"
 #include "ff.h"
 
@@ -237,6 +238,7 @@ void GenericApp_Init( byte task_id )
 #if defined ( LCD_SUPPORTED )
     HalLcdWriteString( "GenericApp", HAL_LCD_LINE_1 );
 #endif
+  HalOledClear();
   GenericApp_OledWorkStatusShow(IDLE_STATUS);
   GenericApp_OledDeviceStatusShow(DEVICE_INFO_OFFLINE_IDLE_ID);
   HalOledShowString(HR_CHAR_X,HR_CHAR_Y,HR_CHAR_SIZE,"HR");
@@ -994,7 +996,8 @@ void GenericApp_OledDeviceStatusShow(uint8 statusID)
     case DEVICE_INFO_SYNC_DATA_ID:
       HalOledShowString(DEVICE_INFO_X,DEVICE_INFO_Y,DEVICE_INFO_SIZE,DEVICE_INFO_SYNC_DATA);
       break;
-  } 
+  }
+  HalShowBattVol(BATTERY_MEASURE_SHOW);
 }
 
 
@@ -1026,6 +1029,7 @@ void GenericApp_OledWorkStatusShow(WorkStatus_t WorkStatus)
     HalOledShowString(HR_WAIT_SYMBOL_X,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+16,HR_WAIT_SYMBOL_Y,64,"-");HalOledShowString(HR_WAIT_SYMBOL_X+32,HR_WAIT_SYMBOL_Y,64,"-");
     num_point = 1;
   }
+  HalShowBattVol(BATTERY_MEASURE_SHOW);
 }
 
 
