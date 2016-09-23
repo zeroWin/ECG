@@ -110,8 +110,8 @@
 #define LED1_POLARITY     ACTIVE_HIGH
 
 /* 2 - LED2 */
-#define LED2_BV           BV(1)
-#define LED2_SBIT         P1_1
+#define LED2_BV           BV(0)
+#define LED2_SBIT         P1_0
 #define LED2_DDR          P1DIR
 #define LED2_POLARITY     ACTIVE_HIGH
 
@@ -124,15 +124,15 @@
 #define ACTIVE_LOW        !
 #define ACTIVE_HIGH       !!    /* double negation forces result to be '1' */
 
-/* S1- Link key Press P1.1*/
-#define PUSH1_BV          BV(7)
-#define PUSH1_SBIT        P0_7
+/* S1- Link key Press P0.6*/
+#define PUSH1_BV          BV(6)
+#define PUSH1_SBIT        P0_6
 
 #define PUSH1_POLARITY    ACTIVE_LOW
 
-/* S2- Work key Press P0.6 */
-#define PUSH2_BV          BV(6)
-#define PUSH2_SBIT        P0_6
+/* S2- Work key Press P1.1 */
+#define PUSH2_BV          BV(1)
+#define PUSH2_SBIT        P1_1
 
 #define PUSH2_POLARITY    ACTIVE_LOW
 

@@ -51,13 +51,12 @@
  *                                             CONSTANTS
  ***************************************************************************************************/
 /* Batter Monitor enable/disable at P1.0
-   ECG上没有电量测量模块，暂且随便弄一个管教
 */
 #define BATTER_MONITOR_EN_PORT 1
 #define BATTER_MONIROT_EN_PIN  0
 
 /* Set ADC channel and resolution
-   ECG上没有电量测量模块，暂且随便弄一个通道1(P0.7)和分辨率
+   通道7(P0.7)
 */
 #define BATTER_MONITOR_CHANNEL      HAL_ADC_CHANNEL_7
 #define BATTER_MONITOR_RESOLUTION   HAL_ADC_RESOLUTION_14
