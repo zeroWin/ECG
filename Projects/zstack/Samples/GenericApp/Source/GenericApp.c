@@ -195,6 +195,7 @@ void GenericApp_Init( byte task_id )
   GenericApp_TaskID = task_id;
   GenericApp_NwkState = DEV_INIT;
   GenericApp_TransID = 0;
+  uint8 loopSDcard = 10;
 
   // Device hardware initialization can be added here or in main() (Zmain.c).
   // If the hardware is application specific - add it here.
@@ -228,7 +229,8 @@ void GenericApp_Init( byte task_id )
   EcgLowPower = ECG_WORK;
   
   // Init SD card and fatfs
-  while(SD_Initialize());
+  while(loopSDcard--)
+    SD_Initialize();
   exfuns_init();      // 申请文件系统内存
   f_mount(0,fs);      // 挂载文件系统  
   f_mkdir("0:D");     // 创建文件夹
