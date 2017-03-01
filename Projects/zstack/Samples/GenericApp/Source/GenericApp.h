@@ -85,7 +85,7 @@ extern "C"
 #define GENERICAPP_SEND_SYNC_PACKET_TIMEOUT 240       // 包与包之间同步间隔为80ms*3
   
 // Sample ECG Timeout
-#define GENERICAPP_SAMPLE_ECG_TIMEOUT 8000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
+#define GENERICAPP_SAMPLE_ECG_TIMEOUT 10000     // Every 10ms = 100Hz  8ms每次太频繁，收不到数据
   
 // Measure status show timeout
 #define GENERICAPP_MEASURE_STATUS_SHOW      500     // 500ms闪烁一次
